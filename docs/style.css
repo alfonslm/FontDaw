@@ -83,6 +83,16 @@ body {
   fill: var(--text);
 }
 
+.mark-barline-thin {
+  fill: none;
+  stroke: var(--text);
+  stroke-width: 1.6;
+}
+
+.mark-barline-thick {
+  fill: var(--text);
+}
+
 .mark-stems {
   fill: none;
   stroke: var(--text);
