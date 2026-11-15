@@ -16,16 +16,19 @@
 <body>
 <main class="page">
   <header class="intro">
-    <svg class="mark" viewBox="0 0 140 48" role="img" aria-labelledby="mark-title">
-      <title id="mark-title">A staff with a G major arpeggio, root, fifth, third, whose middle line turns into a sound wave</title>
+    <svg class="mark" viewBox="0 -16 140 64" role="img" aria-labelledby="mark-title">
+      <title id="mark-title">A staff with a G major arpeggio in 6/8, root, fifth, third, whose middle line turns into a sound wave</title>
       <g class="mark-staff">
-        <path d="M2 8h58M2 16h58M2 32h58M2 40h58"/>
+        <path d="M2 8h60M2 16h60M2 32h60M2 40h60"/>
         <path d="M2 24h66"/>
       </g>
       <g class="mark-notes">
-        <ellipse cx="15" cy="32" rx="5.8" ry="4.3" transform="rotate(-20 15 32)"/>
-        <ellipse cx="32" cy="16" rx="5.8" ry="4.3" transform="rotate(-20 32 16)"/>
+        <ellipse cx="10" cy="32" rx="5.8" ry="4.3" transform="rotate(-20 10 32)"/>
+        <path d="M14.5 3c0 5 8 7 7.5 15.5c-.3 1.6-1.5 3.2-2.4 3.8c1.3-6-3.4-9.6-5.1-10.3Z"/>
+        <ellipse cx="31" cy="16" rx="5.8" ry="4.3" transform="rotate(-20 31 16)"/>
         <ellipse cx="49" cy="24" rx="5.8" ry="4.3" transform="rotate(-20 49 24)"/>
+        <circle cx="58" cy="20" r="1.9"/>
+        <path class="mark-stems" d="M15.3 31V3M36.3 15V-13M54.3 23V-5"/>
       </g>
       <path class="mark-wave" d="M66 24c4 0 5-7 8-7s4 14 7 14 4-22 7-22 4 30 7 30 4-26 7-26 4 18 7 18 4-10 7-10 4 6 7 6 4-3 7-3 4 1 6 0"/>
     </svg>
@@ -43,18 +46,82 @@
     <span><strong>Early development</strong> — nothing to download yet.</span>
   </p>
 
+  <p class="highlight">
+    <strong>Already faster.</strong> FontDaw runs on a modified audio engine that MuseScore Studio does not have: when you export each part to its own audio file, all parts are rendered in parallel in a single pass. That makes part exports up to 5× faster: a 16-part score that took over five minutes now exports in about one.
+  </p>
+
   <section class="goals" aria-labelledby="goals-heading">
     <h2 id="goals-heading">Goals</h2>
-    <p class="goals-note">What FontDaw is being built to do. None of this is ready yet.</p>
-    <ul>
-      <li><strong>The score stays at the centre.</strong> Full notation editing, parts and printing, as in MuseScore Studio.</li>
-      <li><strong>Audio tracks next to the score.</strong> Import recordings and backing tracks and play them in sync with the notation.</li>
-      <li><strong>Recording.</strong> Record vocals and instruments straight into the project, in time with the music.</li>
-      <li><strong>An arrangement timeline.</strong> See score parts and audio tracks side by side; move, trim, split and fade clips.</li>
-      <li><strong>A piano roll.</strong> Shape how notes are played, timing and velocity, without changing how they are written.</li>
-      <li><strong>Mixing.</strong> Effects and instrument plugins, sends and automation.</li>
-      <li><strong>Export.</strong> A finished mix, or one file per track.</li>
-      <li><strong>Free and open.</strong> GPLv3, with no accounts and no proprietary sound library required.</li>
+    <p class="goals-note">What FontDaw is being built to do. Ticked items already work; the rest are planned.</p>
+    <ul class="checklist">
+      <li class="goal">
+        <span class="visually-hidden">Planned: </span><strong>The score stays at the centre.</strong> Full notation editing, parts and printing, as in MuseScore Studio.
+        <ul class="checklist sub">
+          <li class="sub-goal is-done"><span class="visually-hidden">Done: </span>Notation editing, parts and printing</li>
+          <li class="sub-goal is-done"><span class="visually-hidden">Done: </span>MusicXML, MIDI and other score formats</li>
+          <li class="sub-goal"><span class="visually-hidden">Planned: </span>Score and timeline always in sync</li>
+        </ul>
+      </li>
+      <li class="goal">
+        <span class="visually-hidden">Planned: </span><strong>Audio tracks next to the score.</strong> Import recordings and backing tracks and play them in sync with the notation.
+        <ul class="checklist sub">
+          <li class="sub-goal"><span class="visually-hidden">Planned: </span>Import WAV, FLAC, MP3 and Ogg files</li>
+          <li class="sub-goal"><span class="visually-hidden">Planned: </span>Waveform display</li>
+          <li class="sub-goal"><span class="visually-hidden">Planned: </span>Playback locked to the score, following tempo changes</li>
+        </ul>
+      </li>
+      <li class="goal">
+        <span class="visually-hidden">Planned: </span><strong>Recording.</strong> Record vocals and instruments straight into the project, in time with the music.
+        <ul class="checklist sub">
+          <li class="sub-goal is-done"><span class="visually-hidden">Done: </span>Metronome and count-in</li>
+          <li class="sub-goal"><span class="visually-hidden">Planned: </span>Audio input from your sound card, with input monitoring</li>
+          <li class="sub-goal"><span class="visually-hidden">Planned: </span>Latency compensation, so takes land on the beat</li>
+          <li class="sub-goal"><span class="visually-hidden">Planned: </span>Punch-in and loop recording with takes</li>
+        </ul>
+      </li>
+      <li class="goal">
+        <span class="visually-hidden">Planned: </span><strong>An arrangement timeline.</strong> See score parts and audio tracks side by side.
+        <ul class="checklist sub">
+          <li class="sub-goal"><span class="visually-hidden">Planned: </span>Move, trim, split and fade clips</li>
+          <li class="sub-goal"><span class="visually-hidden">Planned: </span>Clip gain, and snap to bars and beats</li>
+          <li class="sub-goal"><span class="visually-hidden">Planned: </span>One undo history for score and audio edits</li>
+        </ul>
+      </li>
+      <li class="goal">
+        <span class="visually-hidden">Planned: </span><strong>A piano roll.</strong> Shape how notes are played without changing how they are written.
+        <ul class="checklist sub">
+          <li class="sub-goal"><span class="visually-hidden">Planned: </span>Note timing and length as played</li>
+          <li class="sub-goal"><span class="visually-hidden">Planned: </span>Velocity and controller lanes</li>
+          <li class="sub-goal"><span class="visually-hidden">Planned: </span>Keep recorded MIDI performances, not only the quantised notes</li>
+        </ul>
+      </li>
+      <li class="goal">
+        <span class="visually-hidden">Planned: </span><strong>Mixing.</strong> Effects, instruments, sends and automation.
+        <ul class="checklist sub">
+          <li class="sub-goal is-done"><span class="visually-hidden">Done: </span>Volume, pan, mute, solo and aux sends</li>
+          <li class="sub-goal is-done"><span class="visually-hidden">Done: </span>VST3 effects and instruments</li>
+          <li class="sub-goal"><span class="visually-hidden">Planned: </span>Plugin delay compensation</li>
+          <li class="sub-goal"><span class="visually-hidden">Planned: </span>Automation lanes on the timeline</li>
+          <li class="sub-goal"><span class="visually-hidden">Planned: </span>Buses and sidechains</li>
+        </ul>
+      </li>
+      <li class="goal">
+        <span class="visually-hidden">Planned: </span><strong>Export.</strong> A finished mix, or one file per track.
+        <ul class="checklist sub">
+          <li class="sub-goal is-done"><span class="visually-hidden">Done: </span>Mixdown to WAV, FLAC, MP3 and Ogg</li>
+          <li class="sub-goal is-done"><span class="visually-hidden">Done: </span>One file per part, rendered in parallel: up to 5× faster</li>
+          <li class="sub-goal"><span class="visually-hidden">Planned: </span>Audio tracks included in every export</li>
+          <li class="sub-goal"><span class="visually-hidden">Planned: </span>Bit depth, dither and loudness options</li>
+        </ul>
+      </li>
+      <li class="goal">
+        <span class="visually-hidden">Planned: </span><strong>Free and open.</strong> GPLv3, with no accounts and no proprietary sound library required.
+        <ul class="checklist sub">
+          <li class="sub-goal is-done"><span class="visually-hidden">Done: </span>Free software under the GPLv3</li>
+          <li class="sub-goal"><span class="visually-hidden">Planned: </span>No accounts or online services needed</li>
+          <li class="sub-goal"><span class="visually-hidden">Planned: </span>Open sound formats (SoundFont, SFZ) instead of a proprietary library</li>
+        </ul>
+      </li>
     </ul>
   </section>
 
