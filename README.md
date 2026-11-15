@@ -7,6 +7,8 @@ then record, arrange and mix audio around it in the same project.
 
 > **Status: early development.** Nothing to download yet.
 
+Website: <https://alfonslm.github.io/FontDaw/>
+
 ## Background
 
 FontDaw is based on [MuseScore Studio](https://github.com/musescore/MuseScore) by MuseScore
