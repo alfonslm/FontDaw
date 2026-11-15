@@ -1,0 +1,185 @@
+:root {
+  color-scheme: light dark;
+  --bg: #fbfaf6;
+  --text: #1c1b18;
+  --muted: #55524a;
+  --line: #d9d5ca;
+  --accent: #a3391a;
+  --accent-text: #ffffff;
+  --panel: #f2efe6;
+  --focus: #1c1b18;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #141311;
+    --text: #ece9e1;
+    --muted: #aaa598;
+    --line: #36332d;
+    --accent: #f08a63;
+    --accent-text: #141311;
+    --panel: #1e1c19;
+    --focus: #ece9e1;
+  }
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif;
+  font-size: 1.0625rem;
+  line-height: 1.6;
+}
+
+.page {
+  display: flex;
+  flex-direction: column;
+  max-width: 38rem;
+  min-height: 100vh;
+  min-height: 100svh;
+  margin: 0 auto;
+  padding: clamp(2.5rem, 10vh, 6rem) 1.25rem 2rem;
+}
+
+.mark {
+  display: block;
+  width: 9.5rem;
+  height: auto;
+  margin-bottom: 1.75rem;
+  overflow: visible;
+}
+
+.mark-staff path,
+.mark-wave {
+  fill: none;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.mark-staff path {
+  stroke: var(--text);
+}
+
+.mark-wave {
+  stroke: var(--accent);
+}
+
+h1 {
+  margin: 0;
+  font-size: clamp(2.5rem, 9vw, 3.5rem);
+  line-height: 1.05;
+  letter-spacing: -0.02em;
+  font-weight: 750;
+}
+
+.tagline {
+  margin: 0.5rem 0 0;
+  font-size: clamp(1.2rem, 4.5vw, 1.45rem);
+  color: var(--muted);
+}
+
+.about {
+  margin-top: 2.25rem;
+}
+
+.about p {
+  margin: 0 0 0.75rem;
+}
+
+.status {
+  display: flex;
+  align-items: baseline;
+  gap: 0.65rem;
+  margin: 1.5rem 0 0;
+  padding: 0.85rem 1rem;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 0.5rem;
+}
+
+.status-dot {
+  flex: none;
+  width: 0.6rem;
+  height: 0.6rem;
+  border-radius: 50%;
+  background: var(--accent);
+  transform: translateY(-0.05rem);
+}
+
+.links {
+  margin: 2rem 0 0;
+}
+
+a {
+  color: inherit;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.18em;
+}
+
+a:hover {
+  text-decoration-thickness: 2px;
+}
+
+.button {
+  display: inline-block;
+  padding: 0.7rem 1.15rem;
+  border-radius: 0.5rem;
+  background: var(--accent);
+  color: var(--accent-text);
+  font-weight: 600;
+  text-decoration: none;
+  transition: filter 0.15s ease;
+}
+
+.button:hover {
+  filter: brightness(1.08);
+}
+
+a:focus-visible {
+  outline: 3px solid var(--focus);
+  outline-offset: 3px;
+  border-radius: 0.25rem;
+}
+
+.button:focus-visible {
+  border-radius: 0.5rem;
+}
+
+.footer {
+  margin-top: auto;
+  padding-top: 3rem;
+  font-size: 0.875rem;
+  color: var(--muted);
+}
+
+.footer p {
+  margin: 0;
+  padding-top: 0.75rem;
+}
+
+.footer p:first-child {
+  border-top: 1px solid var(--line);
+  padding-top: 1.25rem;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    transition: none !important;
+    animation: none !important;
+  }
+}
