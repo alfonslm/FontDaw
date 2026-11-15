@@ -71,6 +71,7 @@ body {
 
 .mark-staff path {
   stroke: var(--text);
+  stroke-linecap: butt; /* square ends: stop flush with the final barline */
 }
 
 .mark-wave {
