@@ -77,6 +77,10 @@ body {
   stroke: var(--accent);
 }
 
+.mark-notes ellipse {
+  fill: var(--text);
+}
+
 h1 {
   margin: 0;
   font-size: clamp(2.5rem, 9vw, 3.5rem);
