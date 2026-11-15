@@ -74,6 +74,10 @@ body {
   stroke-linecap: butt; /* square ends: stop flush with the final barline */
 }
 
+.mark-staff circle {
+  fill: var(--text);
+}
+
 .mark-wave {
   stroke: var(--accent);
 }
