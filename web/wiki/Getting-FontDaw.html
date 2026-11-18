@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Getting FontDaw – FontDaw wiki</title>
+<meta name="description" content="There is no download yet. This page will say where to get FontDaw once there is one.">
+<meta name="color-scheme" content="light dark">
+<link rel="icon" href="../icons/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../style.css">
+</head>
+<body class="wiki-body">
+<header class="wiki-header">
+  <a class="wiki-home" href="../index.html"><img src="../icons/favicon.svg" alt="" width="28" height="28"><span>FontDaw</span></a>
+  <a class="wiki-jump" href="#wiki-nav">All wiki pages</a>
+</header>
+<div class="wiki">
+  <main class="wiki-content">
+    <h1>Getting FontDaw</h1>
+    <p>There is no download yet. This page will say where to get FontDaw once there is one.</p>
+    <h2 id="downloads">Downloads</h2>
+    <p><strong>There are no public builds.</strong> FontDaw is at version 0.1.0 and still in early development. We will not link to a download until one exists. There are no installers yet.</p>
+    <p>When a release exists it will be listed on the <a href="https://github.com/alfonslm/FontDaw/releases" rel="noopener">FontDaw releases page</a>.</p>
+    <h2 id="system-requirements">System requirements</h2>
+    <p>We have not tested FontDaw on specific system versions, so we cannot give minimum requirements yet. What we can say is what the build scripts aim at:</p>
+    <ul>
+      <li>Linux on 64-bit Intel/AMD and on 64-bit ARM.</li>
+      <li>Windows, 64-bit.</li>
+      <li>macOS, on Apple silicon and Intel.</li>
+    </ul>
+    <p><em>Stub: the supported versions of each system, the minimum memory and the audio hardware advice will be listed here once the first release is planned.</em></p>
+    <h2 id="building-from-source">Building from source</h2>
+    <p><strong>The source is not public yet. These steps are for when it is, and nobody has verified this exact command.</strong> The steps for Linux, in short:</p>
+    <ol>
+      <li>Clone the source with its submodules (<code>git clone --recurse-submodules</code>).</li>
+      <li>Install a recent C++ compiler: GCC 14 or newer, or Clang 20 or newer.</li>
+      <li>Install CMake 3.28 or newer.</li>
+      <li>Install Qt 6.10 with the modules qt5compat, qtnetworkauth, qtshadertools and qtwebsockets, and make sure <code>qmake6</code> or <code>qmake</code> is on your path.</li>
+      <li>Install the OpenGL, EGL and xkbcommon development packages (on Debian or Ubuntu: <code>libgl-dev</code>, <code>libegl-dev</code>, <code>libxkbcommon-dev</code>).</li>
+      <li>From the top folder, run <code>cmake -P build.cmake -DCMAKE_BUILD_TYPE=Release -DMUSE_MODULE_VST=ON</code>. The build folder appears under <code>builds/</code>. The last option switches on VST3 support, which is off by default.</li>
+    </ol>
+    <p>Plan for about 18 GB of free disk space. The source of each release will be attached to that release on the <a href="https://github.com/alfonslm/FontDaw/releases" rel="noopener">releases page</a>.</p>
+    <p><em>Stub: steps for Windows and macOS, the full list of Linux packages, and the public place to get the source.</em></p>
+    <h2 id="installing-next-to-musescore">Installing next to MuseScore</h2>
+    <p>FontDaw is designed to keep its own name, settings folder, documents folder and program file (<code>fontdaw</code>), so that it does not touch MuseScore Studio's. Having both installed on one computer has not been tested yet. More in <a href="FontDaw-and-MuseScore.html">FontDaw and MuseScore</a>.</p>
+  </main>
+  <nav id="wiki-nav" class="wiki-nav" aria-label="Wiki pages">
+    <h2 class="nav-title">Wiki pages</h2>
+    <h3 class="nav-group">Start</h3>
+    <ul>
+      <li><a href="index.html">Home</a></li>
+      <li><a href="Status-and-roadmap.html">Status and roadmap</a></li>
+      <li><a href="Getting-FontDaw.html" aria-current="page">Getting FontDaw</a></li>
+      <li><a href="FontDaw-and-MuseScore.html">FontDaw and MuseScore</a></li>
+    </ul>
+    <h3 class="nav-group">Using FontDaw</h3>
+    <ul>
+      <li><a href="Features.html">Features</a></li>
+      <li><a href="Audio-tracks.html">Audio tracks</a></li>
+      <li><a href="Settings.html">Settings</a></li>
+      <li><a href="Keyboard-shortcuts.html">Keyboard shortcuts</a></li>
+      <li><a href="Exporting.html">Exporting</a></li>
+      <li><a href="Plug-ins.html">Plug-ins and sounds</a></li>
+      <li><a href="Installing-FFmpeg.html">Installing FFmpeg</a></li>
+      <li><a href="Opening-newer-files.html">Opening newer files</a></li>
+      <li><a href="Opening-older-files.html">Opening older files</a></li>
+    </ul>
+    <h3 class="nav-group">Help</h3>
+    <ul>
+      <li><a href="FAQ.html">FAQ</a></li>
+      <li><a href="Get-help.html">Get help</a></li>
+      <li><a href="Report-a-problem.html">Report a problem</a></li>
+      <li><a href="Accessibility.html">Accessibility</a></li>
+      <li><a href="Privacy.html">Privacy</a></li>
+    </ul>
+    <h3 class="nav-group">Project</h3>
+    <ul>
+      <li><a href="Contribute.html">Contribute</a></li>
+      <li><a href="Licence-and-credits.html">Licence and credits</a></li>
+      <li><a href="About-the-developer.html">About the developer</a></li>
+      <li><a href="Dev-Diary.html">Dev diary</a></li>
+    </ul>
+  </nav>
+</div>
+<footer class="footer wiki-footer">
+  <p>Based on MuseScore Studio by MuseScore Limited and contributors. FontDaw is not affiliated with or endorsed by MuseScore Limited or Muse Group.</p>
+  <p>Free software under the GNU GPL v3. See <a href="Licence-and-credits.html">Licence and credits</a>.</p>
+</footer>
+</body>
+</html>

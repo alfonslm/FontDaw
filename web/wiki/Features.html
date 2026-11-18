@@ -1,0 +1,134 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Features – FontDaw wiki</title>
+<meta name="description" content="What FontDaw can do, grouped by area. Each feature is marked Works (usable today), In progress (part of it exists) or, in the plan only, left out. We list only what exists or is under way; Status and roadmap has what is planned.">
+<meta name="color-scheme" content="light dark">
+<link rel="icon" href="../icons/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../style.css">
+</head>
+<body class="wiki-body">
+<header class="wiki-header">
+  <a class="wiki-home" href="../index.html"><img src="../icons/favicon.svg" alt="" width="28" height="28"><span>FontDaw</span></a>
+  <a class="wiki-jump" href="#wiki-nav">All wiki pages</a>
+</header>
+<div class="wiki">
+  <main class="wiki-content">
+    <h1>Features</h1>
+    <p>What FontDaw can do, grouped by area. Each feature is marked <strong>Works</strong> (usable today), <strong>In progress</strong> (part of it exists) or, in the plan only, left out. We list only what exists or is under way; <a href="Status-and-roadmap.html">Status and roadmap</a> has what is planned.</p>
+    <p>Most of the features that work come from MuseScore Studio. We have so far confirmed them by reading the code rather than by testing a FontDaw build, so treat the list as a first draft.</p>
+    <h2 id="project-and-timeline">Project and timeline</h2>
+    <ul>
+      <li><strong>Works:</strong> a project file that holds the score, imported audio and the mixer state; tempo map and time signatures; autosave and backups; project templates.</li>
+      <li><strong>In progress:</strong> the position display shows bars and beats and minutes and seconds, but there is no time ruler yet. Undo and redo cover the score but not yet changes to audio tracks. Markers and regions are partly there.</li>
+      <li>There is no timeline view yet.</li>
+    </ul>
+    <h2 id="tracks">Tracks</h2>
+    <ul>
+      <li><strong>Works:</strong> instrument tracks driven by the notation.</li>
+      <li><strong>In progress:</strong> audio tracks. You can import a WAV file onto its own track (see <a href="Audio-tracks.html">Audio tracks</a>). The track plays from the start of the score as one whole file.</li>
+    </ul>
+    <h2 id="audio-recording">Audio recording</h2>
+    <ul>
+      <li><strong>Works:</strong> metronome and count-in.</li>
+      <li>Recording audio is not started. See <a href="Status-and-roadmap.html">Status and roadmap</a>.</li>
+    </ul>
+    <h2 id="audio-editing">Audio editing</h2>
+    <ul>
+      <li><strong>In progress:</strong> importing audio (WAV only so far). Clip gain, fades, and moving, trimming and splitting clips are prepared behind the scenes, but you cannot use them yet. There is no waveform display.</li>
+    </ul>
+    <h2 id="midi">MIDI</h2>
+    <ul>
+      <li><strong>Works:</strong> MIDI keyboard input; importing and exporting MIDI files; MIDI remote control and MIDI learn.</li>
+      <li><strong>In progress:</strong> real-time MIDI recording, quantising, MIDI output to external hardware, and timing and velocity that differ from the written notes.</li>
+      <li>There is no piano roll yet.</li>
+    </ul>
+    <h2 id="notation">Notation</h2>
+    <ul>
+      <li><strong>Works:</strong> full score editing, parts, engraving and printing; import and export of MusicXML, MEI, Guitar Pro and other formats.</li>
+    </ul>
+    <h2 id="mixing">Mixing</h2>
+    <ul>
+      <li><strong>Works:</strong> volume, pan, mute and solo per channel; insert effects; aux sends; level meters; a master channel. Imported audio tracks get a mixer strip.</li>
+      <li><strong>In progress:</strong> built-in EQ, compressor, limiter and reverb.</li>
+    </ul>
+    <h2 id="mastering">Mastering</h2>
+    <ul>
+      <li><strong>In progress:</strong> an ordered effect chain on the master channel. A separate mastering mode is planned.</li>
+    </ul>
+    <h2 id="automation">Automation</h2>
+    <ul>
+      <li><strong>Works:</strong> tempo changes written in the score.</li>
+      <li><strong>In progress:</strong> volume and pan automation, and automation lanes in a timeline. The score already has automation curves for dynamics, tempo, volume and pan; how complete they are has not been checked.</li>
+    </ul>
+    <h2 id="instruments-and-plug-ins">Instruments and plug-ins</h2>
+    <ul>
+      <li><strong>Works:</strong> VST3 instruments and effects; SoundFont playback; plug-in scanning that survives a plug-in that crashes.</li>
+      <li>FontDaw does not use Muse Sounds.</li>
+    </ul>
+    <h2 id="audio-engine-and-devices">Audio engine and devices</h2>
+    <ul>
+      <li><strong>Works:</strong> audio output through WASAPI and ASIO on Windows, Core Audio on macOS, and ALSA on Linux (and PipeWire in the Linux packages). JACK support is in the code but not switched on. Sample rate and buffer size settings; the sample rate choice is shown on Linux only.</li>
+      <li><strong>In progress:</strong> playback that keeps going while you edit a score. This is not yet tested with audio tracks.</li>
+      <li>Audio input from the sound card is not started.</li>
+    </ul>
+    <h2 id="transport-and-sync">Transport and sync</h2>
+    <ul>
+      <li><strong>Works:</strong> play, stop, rewind, seek and loop. The playback cursor follows what you hear, with latency settings.</li>
+    </ul>
+    <h2 id="export">Export</h2>
+    <ul>
+      <li><strong>Works:</strong> mixdown to WAV, FLAC, MP3, Ogg and AAC, including imported audio tracks, with a choice of bit depth for WAV and FLAC. Exporting each part to its own file works on all parts in one pass, which is faster.</li>
+      <li><strong>In progress:</strong> dither and loudness options; stems (one file per track).</li>
+    </ul>
+    <h2 id="video">Video</h2>
+    <ul>
+      <li><strong>Works:</strong> exporting a score as a video.</li>
+    </ul>
+  </main>
+  <nav id="wiki-nav" class="wiki-nav" aria-label="Wiki pages">
+    <h2 class="nav-title">Wiki pages</h2>
+    <h3 class="nav-group">Start</h3>
+    <ul>
+      <li><a href="index.html">Home</a></li>
+      <li><a href="Status-and-roadmap.html">Status and roadmap</a></li>
+      <li><a href="Getting-FontDaw.html">Getting FontDaw</a></li>
+      <li><a href="FontDaw-and-MuseScore.html">FontDaw and MuseScore</a></li>
+    </ul>
+    <h3 class="nav-group">Using FontDaw</h3>
+    <ul>
+      <li><a href="Features.html" aria-current="page">Features</a></li>
+      <li><a href="Audio-tracks.html">Audio tracks</a></li>
+      <li><a href="Settings.html">Settings</a></li>
+      <li><a href="Keyboard-shortcuts.html">Keyboard shortcuts</a></li>
+      <li><a href="Exporting.html">Exporting</a></li>
+      <li><a href="Plug-ins.html">Plug-ins and sounds</a></li>
+      <li><a href="Installing-FFmpeg.html">Installing FFmpeg</a></li>
+      <li><a href="Opening-newer-files.html">Opening newer files</a></li>
+      <li><a href="Opening-older-files.html">Opening older files</a></li>
+    </ul>
+    <h3 class="nav-group">Help</h3>
+    <ul>
+      <li><a href="FAQ.html">FAQ</a></li>
+      <li><a href="Get-help.html">Get help</a></li>
+      <li><a href="Report-a-problem.html">Report a problem</a></li>
+      <li><a href="Accessibility.html">Accessibility</a></li>
+      <li><a href="Privacy.html">Privacy</a></li>
+    </ul>
+    <h3 class="nav-group">Project</h3>
+    <ul>
+      <li><a href="Contribute.html">Contribute</a></li>
+      <li><a href="Licence-and-credits.html">Licence and credits</a></li>
+      <li><a href="About-the-developer.html">About the developer</a></li>
+      <li><a href="Dev-Diary.html">Dev diary</a></li>
+    </ul>
+  </nav>
+</div>
+<footer class="footer wiki-footer">
+  <p>Based on MuseScore Studio by MuseScore Limited and contributors. FontDaw is not affiliated with or endorsed by MuseScore Limited or Muse Group.</p>
+  <p>Free software under the GNU GPL v3. See <a href="Licence-and-credits.html">Licence and credits</a>.</p>
+</footer>
+</body>
+</html>

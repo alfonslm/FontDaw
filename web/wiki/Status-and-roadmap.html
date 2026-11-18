@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Status and roadmap – FontDaw wiki</title>
+<meta name="description" content="What works today, what comes next, and what we mean by &quot;1.0&quot;. Nothing here is a promise of a date.">
+<meta name="color-scheme" content="light dark">
+<link rel="icon" href="../icons/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../style.css">
+</head>
+<body class="wiki-body">
+<header class="wiki-header">
+  <a class="wiki-home" href="../index.html"><img src="../icons/favicon.svg" alt="" width="28" height="28"><span>FontDaw</span></a>
+  <a class="wiki-jump" href="#wiki-nav">All wiki pages</a>
+</header>
+<div class="wiki">
+  <main class="wiki-content">
+    <h1>Status and roadmap</h1>
+    <p>What works today, what comes next, and what we mean by "1.0". Nothing here is a promise of a date.</p>
+    <h2 id="what-works-today">What works today</h2>
+    <p>Most of what works comes from MuseScore Studio, which FontDaw is built on:</p>
+    <ul>
+      <li>Writing, editing and printing scores, including parts.</li>
+      <li>Importing and exporting MusicXML, MIDI and other score formats.</li>
+      <li>Playing a score with SoundFonts or VST3 instruments (VST3 not yet tested in FontDaw), with a mixer: volume, pan, mute, solo, effects and aux sends.</li>
+      <li>Metronome and count-in.</li>
+      <li>Exporting a mixdown as WAV, FLAC, MP3, Ogg or AAC.</li>
+    </ul>
+    <p>New in FontDaw:</p>
+    <ul>
+      <li><strong>An audio file plays with the score.</strong> Use File &gt; Import audio track to put a WAV file on its own track. It plays in time with the score, has its own mixer strip, is included in the exported mixdown, and is saved in the project.</li>
+      <li><strong>Faster export of parts.</strong> Exporting each part to its own audio file now renders all parts in one pass.</li>
+      <li><strong>FontDaw's own name, settings and look.</strong> It is designed to run next to MuseScore Studio without sharing its settings, and it makes no connection to MuseScore's online services. Some texts in the program still say MuseScore Studio.</li>
+    </ul>
+    <p>Be aware that we have worked out what "works" mostly by reading the code, not by testing every feature in a running build. Some entries may turn out to be less finished than listed.</p>
+    <h2 id="what-is-not-there-yet">What is not there yet</h2>
+    <ul>
+      <li>A timeline view with tracks and waveforms. Audio tracks exist, but there is no panel to see them.</li>
+      <li>Editing audio: moving, trimming, splitting, fades, clip gain.</li>
+      <li>Audio formats other than WAV.</li>
+      <li>Recording from a microphone or instrument.</li>
+      <li>Stretching audio to the score's tempo.</li>
+      <li>A piano roll.</li>
+      <li>Installers and packages. There are no public builds.</li>
+    </ul>
+    <h2 id="what-comes-next">What comes next</h2>
+    <p>The plan, in the order we expect to do it. The order may change.</p>
+    <ol>
+      <li><strong>A timeline</strong> with the score's parts and audio tracks side by side, with waveforms, a moving playhead and click-to-seek.</li>
+      <li><strong>Audio editing</strong> on that timeline: move, trim, split, fade, clip gain and snapping to the bars, all with undo.</li>
+      <li><strong>More audio formats:</strong> FLAC, MP3 and Ogg.</li>
+      <li><strong>Safer saving</strong> of projects that contain a lot of audio.</li>
+      <li><strong>Beat matching:</strong> stretching a recording to the score's tempo without changing its pitch.</li>
+      <li><strong>Recording:</strong> audio input from the sound card, monitoring, and latency compensation.</li>
+      <li><strong>Plug-in delay compensation and automation lanes.</strong></li>
+      <li><strong>Piano roll</strong> with velocity and controller editing.</li>
+      <li><strong>Mastering mode:</strong> all tracks are rendered, and only the master channel's effect chain plays live. Editing a note then renders just that track again.</li>
+    </ol>
+    <p>Steps 1 to 4 have a written plan. Work on them has not started.</p>
+    <h2 id="what-10-means">What 1.0 means</h2>
+    <p>We call it FontDaw 1.0 when you can do all of this in one program:</p>
+    <ul>
+      <li>write a score,</li>
+      <li>record and import audio next to it,</li>
+      <li>edit that audio on a timeline and beat-match it to the score's tempo,</li>
+      <li>edit MIDI in a piano roll,</li>
+      <li>mix with plug-ins and automation that stay in time with each other,</li>
+      <li>export the result.</li>
+    </ul>
+    <p>Of the 43 things we count as necessary for 1.0, 18 work today, 12 partly and 13 not at all (counted 16 November 2026, mostly from reading the code). There are further features we expect people to look for after 1.0. We list those in <a href="Features.html">Features</a> once they exist.</p>
+    <p>Not planned: a clip-launching "session view" for live performance, a bundled library of synths and sample content, cloud collaboration and accounts, and anything that depends on Muse Group's online sound library.</p>
+  </main>
+  <nav id="wiki-nav" class="wiki-nav" aria-label="Wiki pages">
+    <h2 class="nav-title">Wiki pages</h2>
+    <h3 class="nav-group">Start</h3>
+    <ul>
+      <li><a href="index.html">Home</a></li>
+      <li><a href="Status-and-roadmap.html" aria-current="page">Status and roadmap</a></li>
+      <li><a href="Getting-FontDaw.html">Getting FontDaw</a></li>
+      <li><a href="FontDaw-and-MuseScore.html">FontDaw and MuseScore</a></li>
+    </ul>
+    <h3 class="nav-group">Using FontDaw</h3>
+    <ul>
+      <li><a href="Features.html">Features</a></li>
+      <li><a href="Audio-tracks.html">Audio tracks</a></li>
+      <li><a href="Settings.html">Settings</a></li>
+      <li><a href="Keyboard-shortcuts.html">Keyboard shortcuts</a></li>
+      <li><a href="Exporting.html">Exporting</a></li>
+      <li><a href="Plug-ins.html">Plug-ins and sounds</a></li>
+      <li><a href="Installing-FFmpeg.html">Installing FFmpeg</a></li>
+      <li><a href="Opening-newer-files.html">Opening newer files</a></li>
+      <li><a href="Opening-older-files.html">Opening older files</a></li>
+    </ul>
+    <h3 class="nav-group">Help</h3>
+    <ul>
+      <li><a href="FAQ.html">FAQ</a></li>
+      <li><a href="Get-help.html">Get help</a></li>
+      <li><a href="Report-a-problem.html">Report a problem</a></li>
+      <li><a href="Accessibility.html">Accessibility</a></li>
+      <li><a href="Privacy.html">Privacy</a></li>
+    </ul>
+    <h3 class="nav-group">Project</h3>
+    <ul>
+      <li><a href="Contribute.html">Contribute</a></li>
+      <li><a href="Licence-and-credits.html">Licence and credits</a></li>
+      <li><a href="About-the-developer.html">About the developer</a></li>
+      <li><a href="Dev-Diary.html">Dev diary</a></li>
+    </ul>
+  </nav>
+</div>
+<footer class="footer wiki-footer">
+  <p>Based on MuseScore Studio by MuseScore Limited and contributors. FontDaw is not affiliated with or endorsed by MuseScore Limited or Muse Group.</p>
+  <p>Free software under the GNU GPL v3. See <a href="Licence-and-credits.html">Licence and credits</a>.</p>
+</footer>
+</body>
+</html>
