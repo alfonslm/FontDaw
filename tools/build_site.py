@@ -87,6 +87,7 @@ def inline(text):
 def markdown(source):
     """Block-level Markdown to HTML. Returns (title, body html)."""
     out, para, items, kind = [], [], [], None
+    figures = 0
     title = None
 
     def flush():
@@ -113,8 +114,12 @@ def markdown(source):
             alt, src, caption = image.groups()
             if not (OUT / src).exists():
                 sys.exit("missing image: web/wiki/" + src)
-            out.append('<figure>\n  <a href="%s"><img src="%s" alt="%s" loading="lazy"></a>\n  <figcaption>%s</figcaption>\n</figure>'
-                       % (html.escape(src), html.escape(src), html.escape(alt), inline(caption)))
+            figures += 1
+            box = "original-%d" % figures
+            out.append('<figure>\n  <a href="%s"><img src="%s" alt="%s" loading="lazy"></a>\n'
+                       '  <label class="original-toggle" for="%s"><input type="checkbox" id="%s"> Original</label>\n'
+                       '  <figcaption>%s</figcaption>\n</figure>'
+                       % (html.escape(src), html.escape(src), html.escape(alt), box, box, inline(caption)))
         elif heading:
             flush()
             level, text = len(heading.group(1)), heading.group(2)
