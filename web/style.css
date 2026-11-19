@@ -581,4 +581,105 @@ code {
     outline: 3px solid var(--focus);
     outline-offset: 2px;
   }
+
+/* ---- Goals: the two drop-downs ---- */
+
+.more {
+  margin: 1rem 0 0;
+  border: 1px solid var(--line);
+  border-radius: 0.5rem;
+  background: var(--panel);
+}
+
+.more summary {
+  padding: 0.8rem 1rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.more summary:focus-visible {
+  outline: 3px solid var(--focus);
+  outline-offset: 2px;
+  border-radius: 0.5rem;
+}
+
+.more[open] summary {
+  border-bottom: 1px solid var(--line);
+}
+
+.more > :not(summary) {
+  margin-left: 1rem;
+  margin-right: 1rem;
+}
+
+.more .more-note {
+  margin-top: 0.85rem;
+  margin-bottom: 0;
+  color: var(--muted);
+  font-size: 0.95rem;
+}
+
+.more h3 {
+  margin-top: 1.25rem;
+  margin-bottom: 0.35rem;
+  font-size: 1rem;
+}
+
+.plain-list,
+.feature-list {
+  margin-top: 0;
+  margin-bottom: 0;
+  padding-left: 1.25rem;
+  font-size: 0.95rem;
+}
+
+.feature-list {
+  padding-left: 0;
+  list-style: none;
+}
+
+.plain-list li,
+.feature-list li {
+  margin: 0 0 0.35rem;
+}
+
+.feature-list li {
+  display: flex;
+  align-items: baseline;
+  gap: 0.6rem;
+}
+
+.more > :last-child {
+  margin-bottom: 1rem;
+}
+
+.badge {
+  flex: none;
+  width: 6.5rem;
+  padding: 0.05rem 0.4rem;
+  border-radius: 0.3rem;
+  border: 1px solid var(--line);
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-align: center;
+  white-space: nowrap;
+}
+
+.badge-works {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--accent-text);
+}
+
+.badge-partly {
+  border-color: var(--accent);
+}
+
+.badge-progress {
+  border-style: dashed;
+  border-color: var(--muted);
+}
+
+.badge-planned {
+  color: var(--muted);
 }
