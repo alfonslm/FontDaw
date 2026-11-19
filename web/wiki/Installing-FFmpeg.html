@@ -10,12 +10,20 @@
 <link rel="stylesheet" href="../style.css">
 </head>
 <body class="wiki-body">
-<header class="wiki-header">
-  <a class="wiki-home" href="../index.html"><img src="../icons/favicon.svg" alt="" width="28" height="28"><span>FontDaw</span></a>
-  <a class="wiki-jump" href="#wiki-nav">All wiki pages</a>
+<a class="skip-link" href="#content">Skip to content</a>
+<header class="site-header">
+  <a class="site-home" href="../index.html"><img src="../icons/favicon.svg" alt="" width="28" height="28"><span>FontDaw</span></a>
+  <nav class="site-nav" aria-label="Site">
+    <ul>
+      <li><a href="../wiki/index.html" aria-current="true">Wiki</a></li>
+      <li><a href="../wiki/Dev-Diary.html">Dev diary</a></li>
+      <li><a href="../wiki/About-the-developer.html">About</a></li>
+    </ul>
+  </nav>
 </header>
 <div class="wiki">
-  <main class="wiki-content">
+  <main id="content" class="wiki-content">
+    <p class="wiki-jump"><a href="#wiki-nav">All wiki pages</a></p>
     <h1>Installing FFmpeg</h1>
     <p>Exporting a score as a video needs the FFmpeg program, which FontDaw does not include.</p>
     <h2 id="what-ffmpeg-is-for-and-how-fontdaw-finds-it">What FFmpeg is for, and how FontDaw finds it</h2>

@@ -24,7 +24,8 @@
 # ".md" (as a GitHub wiki does): [FAQ](FAQ), [files](FontDaw-and-MuseScore#files-and-formats).
 # The converter covers the Markdown these pages use: headings, paragraphs, bulleted and numbered
 # lists, **bold**, *italic*, `code` and links, and pictures on a line of their own, written
-# ![what the picture shows](images/name.png "caption"); the pictures live in web/wiki/images/.
+# ![what the picture shows](images/name.png "caption"); the pictures live in wiki/images/, so they
+# also show when a page is read on github.com, and the build copies them to web/wiki/images/.
 # A screenshot (with a caption) is shown with light and dark swapped in the dark theme, with an
 # "Original" tick box; a photo, written without a caption, ![what it shows](images/name.jpg),
 # is always shown as it is.
@@ -34,10 +35,12 @@
 import html
 import pathlib
 import re
+import shutil
 import sys
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 SRC = ROOT / "wiki"
+IMAGES = SRC / "images"  # pictures; copied to web/wiki/images/ by the build
 OUT = ROOT / "web" / "wiki"
 SITE_URL = "https://alfonslm.github.io/FontDaw/"
 
@@ -116,15 +119,15 @@ def markdown(source):
         elif photo:
             flush()
             alt, src = photo.groups()
-            if not (OUT / src).exists():
-                sys.exit("missing image: web/wiki/" + src)
+            if not (SRC / src).exists():
+                sys.exit("missing image: wiki/" + src)
             out.append('<figure class="photo">\n  <img src="%s" alt="%s" loading="lazy">\n</figure>'
                        % (html.escape(src), html.escape(alt)))
         elif image:
             flush()
             alt, src, caption = image.groups()
-            if not (OUT / src).exists():
-                sys.exit("missing image: web/wiki/" + src)
+            if not (SRC / src).exists():
+                sys.exit("missing image: wiki/" + src)
             figures += 1
             box = "original-%d" % figures
             out.append('<figure class="screenshot">\n  <a href="%s"><img src="%s" alt="%s" loading="lazy"></a>\n'
@@ -181,6 +184,24 @@ def sidebar(current):
     return "\n".join(parts), [page for _, links in groups for _, page in links]
 
 
+SITE_LINKS = [("Wiki", "wiki/index.html"), ("Dev diary", "wiki/Dev-Diary.html"), ("About", "wiki/About-the-developer.html")]
+
+
+def site_header(prefix, current=None, exact=False):
+    """The header on every page: FontDaw (home), Wiki, Dev diary, About. web/index.html carries a
+    copy of it written by hand; keep the two the same."""
+    links = []
+    for title, href in SITE_LINKS:
+        here = ""
+        if title == current:  # "page" on the page itself, "true" for the section it is in
+            here = ' aria-current="%s"' % ("page" if exact else "true")
+        links.append('      <li><a href="%s%s"%s>%s</a></li>' % (prefix, href, here, title))
+    return ('<header class="site-header">\n'
+            '  <a class="site-home" href="%sindex.html"><img src="%sicons/favicon.svg" alt="" width="28" height="28"><span>FontDaw</span></a>\n'
+            '  <nav class="site-nav" aria-label="Site">\n    <ul>\n%s\n    </ul>\n  </nav>\n</header>'
+            % (prefix, prefix, "\n".join(links)))
+
+
 TEMPLATE = """<!doctype html>
 <html lang="en">
 <head>
@@ -193,12 +214,11 @@ TEMPLATE = """<!doctype html>
 <link rel="stylesheet" href="../style.css">
 </head>
 <body class="wiki-body">
-<header class="wiki-header">
-  <a class="wiki-home" href="../index.html"><img src="../icons/favicon.svg" alt="" width="28" height="28"><span>FontDaw</span></a>
-  <a class="wiki-jump" href="#wiki-nav">All wiki pages</a>
-</header>
+<a class="skip-link" href="#content">Skip to content</a>
+{header}
 <div class="wiki">
-  <main class="wiki-content">
+  <main id="content" class="wiki-content">
+    <p class="wiki-jump"><a href="#wiki-nav">All wiki pages</a></p>
 {body}
   </main>
   <nav id="wiki-nav" class="wiki-nav" aria-label="Wiki pages">
@@ -232,7 +252,9 @@ def main():
         description = re.sub(r"<[^>]+>", "", first_para.group(1)) if first_para else title
         page_title = "FontDaw wiki" if p.stem == "Home" else "%s – FontDaw wiki" % html.unescape(re.sub(r"<[^>]+>", "", inline(title)))
         indent = lambda s, n: "\n".join((" " * n + l) if l else l for l in s.splitlines())
+        current = {"Dev-Diary": "Dev diary", "About-the-developer": "About"}.get(p.stem, "Wiki")
         built[page_file(p.stem)] = TEMPLATE.format(
+            header=site_header("../", current, p.stem in ("Home", "Dev-Diary", "About-the-developer")),
             page_title=html.escape(page_title),
             description=html.escape(html.unescape(description), quote=True),
             nav=indent(nav, 4),
@@ -242,6 +264,10 @@ def main():
         old.unlink()
     for name, text in built.items():
         (OUT / name).write_text(text, encoding="utf-8")
+    # pictures: web/wiki/images/ is a copy of wiki/images/
+    shutil.rmtree(OUT / "images", ignore_errors=True)
+    if IMAGES.exists():
+        shutil.copytree(IMAGES, OUT / "images")
     print("Built %d pages in %s" % (len(pages), OUT.relative_to(ROOT)))
 
 
