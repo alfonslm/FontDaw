@@ -25,6 +25,7 @@
 
 import html
 import pathlib
+import sys
 
 W, P, I, N = "works", "partly works", "in progress", "planned"
 F = [
@@ -130,9 +131,10 @@ F = [
   ("The SFZ sampler format", N),
   ("Built-in synths and drum machine", N)]),
  ("Audio engine and devices", [
-  ("Output through WASAPI, ASIO, Core Audio, ALSA, PipeWire and JACK", W),
+  ("Output through WASAPI, ASIO, Core Audio, ALSA and PipeWire", W),
   ("Sample rate and buffer size settings", W),
   ("Smooth playback while editing (large scores still redraw slowly; work on speed has started)", P),
+  ("JACK output", N),
   ("Input through the same drivers", N),
   ("Several outputs, such as a headphone mix", N)]),
  ("Transport and sync", [
@@ -190,6 +192,9 @@ def full():
 
 def main():
     page = PAGE.read_text(encoding="utf-8")
+    for marker in (START, END):
+        if page.count(marker) != 1:
+            sys.exit("%s must contain the marker %s exactly once (found %d)" % (PAGE.name, marker, page.count(marker)))
     head, rest = page.split(START, 1)
     _, tail = rest.split(END, 1)
     body = "\n".join("    " + line for line in planned() + full())
