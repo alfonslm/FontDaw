@@ -553,11 +553,11 @@ code {
 }
 
 @media (prefers-color-scheme: dark) {
-  .wiki-content figure img {
+  .wiki-content figure.screenshot img {
     filter: invert(1) hue-rotate(180deg);
   }
 
-  .wiki-content figure:has(.original-toggle input:checked) img {
+  .wiki-content figure.screenshot:has(.original-toggle input:checked) img {
     filter: none;
   }
 
@@ -580,6 +580,18 @@ code {
   .original-toggle input:focus-visible {
     outline: 3px solid var(--focus);
     outline-offset: 2px;
+  }
+}
+
+/* A photo on a wiki page: full width on a phone, a modest size on wider screens. */
+
+.wiki-content figure.photo img {
+  border: 0;
+}
+
+@media (min-width: 40rem) {
+  .wiki-content figure.photo {
+    max-width: 18rem;
   }
 }
 

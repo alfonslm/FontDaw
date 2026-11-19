@@ -4,6 +4,8 @@
 
 ## The developer
 
+![Alfons seen from behind on a gravel track between fields, with a black-and-white cat on one shoulder](images/about-the-developer.jpg)
+
 *This is a stub. The developer will write the full text later.*
 
 FontDaw currently has one developer: Alfons.
