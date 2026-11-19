@@ -2,6 +2,42 @@
 
 What we have done on FontDaw, newest first. One entry for a day with notable progress. We write what changed for a user, and what did not work or is still open. Nothing here is a promise.
 
+## 19 November 2026: audio in the score
+
+**Audio is now part of the score.** An audio track shows up in the score as an audio staff with its waveform, in every view and in print, and it plays in step with the notes. Insert or delete bars, and the audio moves with them. Besides WAV, you can now import FLAC, MP3, Ogg Vorbis and Opus files. Undo and redo cover audio edits too, in the same history as the score.
+
+![A score for flute, violin and cello with a fourth staff below, labelled Groove, which shows a coloured waveform in each bar](images/2026-11-19-01-audio-staff.png "An audio recording sits in the score as its own staff, right under the instruments, with its waveform drawn bar by bar. You can see where the beats fall against the written notes, so audio and notation line up on the same page.")
+
+![The same score during playback, with a blue vertical cursor in the third bar crossing all four staves, the audio staff included](images/2026-11-19-02-playback.png "The same score during playback. The playback cursor runs through the notated staves and the audio staff together, because the recording plays in time with the score.")
+
+**Quicker commands.** A right-click opens a ring menu around the note. A command menu finds any command when you type its name.
+
+![A round menu around a selected violin note, with eight symbols around it for articulations, ties, delete and more](images/2026-11-19-03-ring-menu.png "Right-clicking a note opens a ring of the most useful actions around the pointer: articulations, note values, ties, delete. Pick one without travelling to a toolbar. The labels will get icons and names soon.")
+
+![A search box over the score with the word tie typed in, and a list of matching commands below it, the first being Tie with its keyboard shortcut](images/2026-11-19-04-command-menu.png "The command menu (Tools, then Command menu) finds any command by typing part of its name, here “tie”, and shows its keyboard shortcut next to it. Handy when you don't remember where something lives in the menus.")
+
+*These pictures come from a development build, so the top bar shows a DevTools tab and a Diagnostics menu that a released version will not have.*
+
+**Newer foundations.** FontDaw now runs on MuseScore's newest code, including its new shortcut system. MuseScore's current key layout is the default.
+
+**Fixes.**
+
+- Solo is no longer saved as mutes.
+- The mixer settings of audio tracks are saved.
+- Missing mixer strips are back.
+- VST instruments such as VOCALOID now follow the score when you start, stop or jump.
+- Quitting after using plug-ins no longer crashes.
+- Starting playback in a large score no longer crashes.
+
+**Being designed.**
+
+- A new way of selecting, with a soft glow that shows what a click will act on.
+- Articulation maps for sample libraries, so you need no keyswitch notes in the score.
+- A Time view where one second always takes the same width.
+- Dark score pages, with a separate Print view that shows the printed colours.
+
+**What comes next.** Audio tracks as parts of their own, then moving clips directly in the score.
+
 ## 16 November 2026: the first week
 
 **The goal.** FontDaw is meant to become a notation-first DAW. The score stays at the centre of the project. Around it we want audio tracks, recording and mixing, so that you can write music in standard notation and record, arrange and mix audio next to it in one program. Many DAWs treat notation as an extra. Many notation programs treat audio as an extra. We want to start from the score.

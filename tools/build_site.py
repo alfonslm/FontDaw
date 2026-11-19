@@ -23,7 +23,9 @@
 # per page, with the navigation in wiki/_Sidebar.md. Links between pages use the page name without
 # ".md" (as a GitHub wiki does): [FAQ](FAQ), [files](FontDaw-and-MuseScore#files-and-formats).
 # The converter covers the Markdown these pages use: headings, paragraphs, bulleted and numbered
-# lists, **bold**, *italic*, `code` and links. Run it after changing wiki/ and commit the result;
+# lists, **bold**, *italic*, `code` and links, and pictures on a line of their own, written
+# ![what the picture shows](images/name.png "caption"); the pictures live in web/wiki/images/.
+# Run it after changing wiki/ and commit the result.
 # The Pages workflow publishes web/ as it is.
 
 import html
@@ -102,9 +104,17 @@ def markdown(source):
         stripped = line.strip()
         heading = re.match(r"^(#{1,3})\s+(.*)$", stripped)
         bullet = re.match(r"^[-*]\s+(.*)$", stripped)
+        image = re.match(r'^!\[([^\]]*)\]\((\S+)\s+"([^"]*)"\)$', stripped)
         number = re.match(r"^\d+\.\s+(.*)$", stripped)
         if not stripped:
             flush()
+        elif image:
+            flush()
+            alt, src, caption = image.groups()
+            if not (OUT / src).exists():
+                sys.exit("missing image: web/wiki/" + src)
+            out.append('<figure>\n  <a href="%s"><img src="%s" alt="%s" loading="lazy"></a>\n  <figcaption>%s</figcaption>\n</figure>'
+                       % (html.escape(src), html.escape(src), html.escape(alt), inline(caption)))
         elif heading:
             flush()
             level, text = len(heading.group(1)), heading.group(2)

@@ -524,3 +524,23 @@ code {
     display: none;
   }
 }
+
+/* ---- Wiki: pictures with captions ---- */
+
+.wiki-content figure {
+  margin: 1.5rem 0;
+}
+
+.wiki-content figure img {
+  display: block;
+  width: 100%;
+  height: auto;
+  border: 1px solid var(--line);
+  border-radius: 0.4rem;
+}
+
+.wiki-content figcaption {
+  margin-top: 0.5rem;
+  color: var(--muted);
+  font-size: 0.9rem;
+}
