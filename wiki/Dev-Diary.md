@@ -2,21 +2,25 @@
 
 What we have done on FontDaw, newest first. One entry for a day with notable progress. We write what changed for a user, and what did not work or is still open. Nothing here is a promise.
 
+An entry about features that are only in development builds names the development build it describes. Once there are releases, entries name the release's version number instead.
+
 ## 19 November 2026: audio in the score
+
+*Development build 0.1.0, 19 November 2026.*
 
 **Audio is now part of the score.** An audio track shows up in the score as an audio staff with its waveform, in every view and in print, and it plays in step with the notes. Insert or delete bars, and the audio moves with them. Besides WAV, you can now import FLAC, MP3, Ogg Vorbis and Opus files. Undo and redo cover audio edits too, in the same history as the score.
 
-![A score for flute, violin and cello with a fourth staff below, labelled Groove, which shows a coloured waveform in each bar](images/2026-11-19-01-audio-staff.png "An audio recording sits in the score as its own staff, right under the instruments, with its waveform drawn bar by bar. You can see where the beats fall against the written notes, so audio and notation line up on the same page.")
+![A score for flute, violin and cello with a fourth staff below, labelled Groove, which shows a coloured waveform in each bar](images/2026-11-19-01-audio-staff.png "An audio recording sits in the score as its own staff, right under the instruments, with its waveform drawn bar by bar. You can see where the beats fall against the written notes, so audio and notation line up on the same page. Development build 0.1.0, 19 November 2026.")
 
-![The same score during playback, with a blue vertical cursor in the third bar crossing all four staves, the audio staff included](images/2026-11-19-02-playback.png "The same score during playback. The playback cursor runs through the notated staves and the audio staff together, because the recording plays in time with the score.")
+![The same score during playback, with a blue vertical cursor in the third bar crossing all four staves, the audio staff included](images/2026-11-19-02-playback.png "The same score during playback. The playback cursor runs through the notated staves and the audio staff together, because the recording plays in time with the score. Development build 0.1.0, 19 November 2026.")
 
 **Quicker commands.** A right-click opens a ring menu around the note. A command menu finds any command when you type its name.
 
-![A round menu around a selected violin note, with eight symbols around it for articulations, ties, delete and more](images/2026-11-19-03-ring-menu.png "Right-clicking a note opens a ring of the most useful actions around the pointer: articulations, note values, ties, delete. Pick one without travelling to a toolbar. The labels will get icons and names soon.")
+![A round menu around a selected violin note, with eight symbols around it for articulations, ties, delete and more](images/2026-11-19-03-ring-menu.png "Right-clicking a note opens a ring of the most useful actions around the pointer: articulations, note values, ties, delete. Pick one without travelling to a toolbar. The labels will get icons and names soon. Development build 0.1.0, 19 November 2026.")
 
-![A search box over the score with the word tie typed in, and a list of matching commands below it, the first being Tie with its keyboard shortcut](images/2026-11-19-04-command-menu.png "The command menu (Tools, then Command menu) finds any command by typing part of its name, here “tie”, and shows its keyboard shortcut next to it. Handy when you don't remember where something lives in the menus.")
+![A search box over the score with the word tie typed in, and a list of matching commands below it, the first being Tie with its keyboard shortcut](images/2026-11-19-04-command-menu.png "The command menu (Tools, then Command menu) finds any command by typing part of its name, here “tie”, and shows its keyboard shortcut next to it. Handy when you don't remember where something lives in the menus. Development build 0.1.0, 19 November 2026.")
 
-*These pictures come from a development build, so the top bar shows a DevTools tab and a Diagnostics menu that a released version will not have.*
+*Because these pictures come from a development build, the top bar shows a DevTools tab and a Diagnostics menu that a released version will not have.*
 
 **Newer foundations.** FontDaw now runs on MuseScore's newest code, including its new shortcut system. MuseScore's current key layout is the default.
 
