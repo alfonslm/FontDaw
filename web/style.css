@@ -581,6 +581,7 @@ code {
     outline: 3px solid var(--focus);
     outline-offset: 2px;
   }
+}
 
 /* ---- Goals: the two drop-downs ---- */
 

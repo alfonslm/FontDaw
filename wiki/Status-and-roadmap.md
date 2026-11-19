@@ -35,7 +35,7 @@ Be aware that we have worked out what "works" mostly by reading the code, not by
 The plan, in the order we expect to do it. The order may change.
 
 1. **A timeline** with the score's parts and audio tracks side by side, with waveforms, a moving playhead and click-to-seek.
-2. **Audio editing** on that timeline: move, trim, split, fade, clip gain and snapping to the bars, all with undo.
+2. **Audio editing** on that timeline: move, trim, split, fade, clip gain and snapping to the bars.
 3. **Safer saving** of projects that contain a lot of audio.
 4. **Beat matching:** stretching a recording to the score's tempo without changing its pitch.
 5. **Recording:** audio input from the sound card, monitoring, and latency compensation.
@@ -43,7 +43,7 @@ The plan, in the order we expect to do it. The order may change.
 7. **Piano roll** with velocity and controller editing.
 8. **Mastering mode:** all tracks are rendered, and only the master channel's effect chain plays live. Editing a note then renders just that track again.
 
-Steps 1 to 4 have a written plan. Work on them has not started.
+Steps 1 to 3 have a written plan. Parts of step 2 already exist, such as clip volume and fades, and undo already covers audio edits.
 
 ## What 1.0 means
 
