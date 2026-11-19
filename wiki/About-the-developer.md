@@ -1,13 +1,13 @@
 # About the developer
 
-*This page is a stub. The developer will write the full text later.*
+*This page is a stub for now. I will write the full text later.*
 
-## The developer
+## Who I am
 
 ![Alfons seen from behind on a gravel track between fields, with a black-and-white cat on one shoulder](images/about-the-developer.jpg)
 
-*This is a stub. The developer will write the full text later.*
+*This part is a stub for now too.*
 
-FontDaw currently has one developer: Alfons.
+Hi, I'm Alfons. Right now I'm the only developer of FontDaw.
 
-Alfons is attending a music theory and production class at the moment. Alfons started in music by playing a variety of brass instruments in primary school. Today the main instruments are string instruments: electric bass, double bass and cello. In secondary school Alfons studied IT administration, programming and fashion.
+I'm taking a class in music theory and production at the moment. I started in music by playing a variety of brass instruments in primary school. Today I mostly play string instruments: electric bass, double bass and cello. In secondary school I studied IT administration, programming and fashion.
