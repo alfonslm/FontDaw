@@ -43,12 +43,25 @@ body {
   line-height: 1.6;
 }
 
+/* The front page: the header, then .page filling the rest of the window, so the footer sits at
+   the bottom whatever the header's height. */
+.front {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  min-height: 100svh;
+}
+
+.front > .site-header {
+  width: 100%;
+}
+
 .page {
   display: flex;
   flex-direction: column;
   max-width: 38rem;
-  min-height: calc(100vh - 4.5rem);
-  min-height: calc(100svh - 4.5rem);
+  flex: 1 0 auto;
+  width: 100%;
   margin: 0 auto;
   padding: clamp(2.5rem, 10vh, 6rem) 1.25rem 2rem;
 }
