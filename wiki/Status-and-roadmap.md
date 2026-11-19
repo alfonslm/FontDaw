@@ -8,13 +8,13 @@ Most of what works comes from MuseScore Studio, which FontDaw is built on:
 
 - Writing, editing and printing scores, including parts.
 - Importing and exporting MusicXML, MIDI and other score formats.
-- Playing a score with SoundFonts or VST3 instruments (VST3 not yet tested in FontDaw), with a mixer: volume, pan, mute, solo, effects and aux sends.
+- Playing a score with SoundFonts or VST3 instruments, with a mixer: volume, pan, mute, solo, effects and aux sends.
 - Metronome and count-in.
 - Exporting a mixdown as WAV, FLAC, MP3, Ogg or AAC.
 
 New in FontDaw:
 
-- **An audio file plays with the score.** Use File > Import audio track to put a WAV file on its own track. It plays in time with the score, has its own mixer strip, is included in the exported mixdown, and is saved in the project.
+- **An audio file plays with the score.** Use File > Import audio track to put a WAV, FLAC, MP3 or Ogg file on its own track. It shows up in the score as an audio staff with its waveform, plays in time with the score, has its own mixer strip, is included in the exported mixdown, and is saved in the project.
 - **Faster export of parts.** Exporting each part to its own audio file now renders all parts in one pass.
 - **FontDaw's own name, settings and look.** It is designed to run next to MuseScore Studio without sharing its settings, and it makes no connection to MuseScore's online services. Some texts in the program still say MuseScore Studio.
 
@@ -22,9 +22,9 @@ Be aware that we have worked out what "works" mostly by reading the code, not by
 
 ## What is not there yet
 
-- A timeline view with tracks and waveforms. Audio tracks exist, but there is no panel to see them.
+- A separate timeline view with tracks. Audio tracks show up in the score as audio staves, but there is no timeline panel yet.
 - Editing audio: moving, trimming, splitting, fades, clip gain.
-- Audio formats other than WAV.
+- Audio formats other than WAV, FLAC, MP3 and Ogg, such as AAC and AIFF.
 - Recording from a microphone or instrument.
 - Stretching audio to the score's tempo.
 - A piano roll.
@@ -36,13 +36,12 @@ The plan, in the order we expect to do it. The order may change.
 
 1. **A timeline** with the score's parts and audio tracks side by side, with waveforms, a moving playhead and click-to-seek.
 2. **Audio editing** on that timeline: move, trim, split, fade, clip gain and snapping to the bars, all with undo.
-3. **More audio formats:** FLAC, MP3 and Ogg.
-4. **Safer saving** of projects that contain a lot of audio.
-5. **Beat matching:** stretching a recording to the score's tempo without changing its pitch.
-6. **Recording:** audio input from the sound card, monitoring, and latency compensation.
-7. **Plug-in delay compensation and automation lanes.**
-8. **Piano roll** with velocity and controller editing.
-9. **Mastering mode:** all tracks are rendered, and only the master channel's effect chain plays live. Editing a note then renders just that track again.
+3. **Safer saving** of projects that contain a lot of audio.
+4. **Beat matching:** stretching a recording to the score's tempo without changing its pitch.
+5. **Recording:** audio input from the sound card, monitoring, and latency compensation.
+6. **Plug-in delay compensation and automation lanes.**
+7. **Piano roll** with velocity and controller editing.
+8. **Mastering mode:** all tracks are rendered, and only the master channel's effect chain plays live. Editing a note then renders just that track again.
 
 Steps 1 to 4 have a written plan. Work on them has not started.
 

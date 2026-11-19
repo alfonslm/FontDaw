@@ -14,6 +14,6 @@ FontDaw's developer: see [About the developer](About-the-developer).
 
 FontDaw is not affiliated with or endorsed by MuseScore Limited or Muse Group.
 
-FontDaw also uses many other free libraries, each under its own licence. The main ones are Qt, libsndfile, Ogg, Vorbis, FLAC, Opus, liblouis (braille), FluidSynth and LAME. The default SoundFont is MS Basic.
+FontDaw also uses many other free libraries, each under its own licence. The main ones are Qt, libsndfile, mpg123 (MP3 import), Ogg, Vorbis, FLAC, Opus, liblouis (braille), FluidSynth and LAME. The default SoundFont is MS Basic.
 
 *Stub: a full list of third-party components with their licences will go here.*

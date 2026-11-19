@@ -117,9 +117,10 @@ def markdown(source):
             figures += 1
             box = "original-%d" % figures
             out.append('<figure>\n  <a href="%s"><img src="%s" alt="%s" loading="lazy"></a>\n'
-                       '  <label class="original-toggle" for="%s"><input type="checkbox" id="%s"> Original</label>\n'
+                       '  <label class="original-toggle" for="%s"><input type="checkbox" id="%s"> Original'
+                       '<span class="visually-hidden"> colours of picture %d: %s</span></label>\n'
                        '  <figcaption>%s</figcaption>\n</figure>'
-                       % (html.escape(src), html.escape(src), html.escape(alt), box, box, inline(caption)))
+                       % (html.escape(src), html.escape(src), html.escape(alt), box, box, figures, html.escape(alt), inline(caption)))
         elif heading:
             flush()
             level, text = len(heading.group(1)), heading.group(2)
@@ -207,13 +208,12 @@ def main():
     if not (SRC / "_Sidebar.md").exists():
         sys.exit("missing wiki/_Sidebar.md")
     OUT.mkdir(parents=True, exist_ok=True)
-    for old in OUT.glob("*.html"):
-        old.unlink()
     pages = sorted(p for p in SRC.glob("*.md") if not p.name.startswith("_"))
     _, listed = sidebar(None)
     for p in pages:
         if p.stem not in listed:
             sys.exit("page %s is not in wiki/_Sidebar.md" % p.stem)
+    built = {}  # every page is built first, so an error leaves the old pages in place
     for p in pages:
         title, body = markdown(p.read_text(encoding="utf-8"))
         nav, _ = sidebar(p.stem)
@@ -221,12 +221,16 @@ def main():
         description = re.sub(r"<[^>]+>", "", first_para.group(1)) if first_para else title
         page_title = "FontDaw wiki" if p.stem == "Home" else "%s – FontDaw wiki" % html.unescape(re.sub(r"<[^>]+>", "", inline(title)))
         indent = lambda s, n: "\n".join((" " * n + l) if l else l for l in s.splitlines())
-        (OUT / page_file(p.stem)).write_text(TEMPLATE.format(
+        built[page_file(p.stem)] = TEMPLATE.format(
             page_title=html.escape(page_title),
             description=html.escape(html.unescape(description), quote=True),
             nav=indent(nav, 4),
             body=indent(body, 4),
-        ), encoding="utf-8")
+        )
+    for old in OUT.glob("*.html"):
+        old.unlink()
+    for name, text in built.items():
+        (OUT / name).write_text(text, encoding="utf-8")
     print("Built %d pages in %s" % (len(pages), OUT.relative_to(ROOT)))
 
 

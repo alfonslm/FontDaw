@@ -28,11 +28,11 @@ No. FontDaw makes no network connections of its own. See [Privacy](Privacy).
 
 ## Does it work with Muse Sounds?
 
-No. Muse Sounds needs a closed-source library and Muse Group's online services. FontDaw plays with SoundFonts and VST3 instruments (VST3 not yet tested in FontDaw).
+No. Muse Sounds needs a closed-source library and Muse Group's online services. FontDaw plays with SoundFonts and VST3 instruments.
 
 ## Can I record audio?
 
-Not yet. Recording is on the plan. You can import a WAV file today: see [Audio tracks](Audio-tracks).
+Not yet. Recording is on the plan. You can import WAV, FLAC, MP3 and Ogg files today: see [Audio tracks](Audio-tracks).
 
 ## Which systems will it run on?
 

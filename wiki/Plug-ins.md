@@ -8,7 +8,7 @@ FontDaw plays SoundFont files (`.sf2` and `.sf3`) with a built-in synthesiser, s
 
 ## VST3 instruments and effects
 
-FontDaw can host VST3 plug-ins, both instruments and effects. This is inherited from MuseScore Studio and **not yet tested in FontDaw**. Plug-ins are scanned in a way that is meant to survive a plug-in that crashes, so one bad plug-in should not close the program. We have not yet tested this in a FontDaw build.
+FontDaw can host VST3 plug-ins, both instruments and effects. This is inherited from MuseScore Studio and works in FontDaw; VST instruments also follow the score when you start, stop or jump. Plug-ins are scanned in a way that is meant to survive a plug-in that crashes, so one bad plug-in should not close the program. We have not yet tested this in a FontDaw build.
 
 *Stub: where to add plug-in folders and how to scan will go here.*
 

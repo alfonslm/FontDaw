@@ -23,22 +23,22 @@
     <ul>
       <li>Writing, editing and printing scores, including parts.</li>
       <li>Importing and exporting MusicXML, MIDI and other score formats.</li>
-      <li>Playing a score with SoundFonts or VST3 instruments (VST3 not yet tested in FontDaw), with a mixer: volume, pan, mute, solo, effects and aux sends.</li>
+      <li>Playing a score with SoundFonts or VST3 instruments, with a mixer: volume, pan, mute, solo, effects and aux sends.</li>
       <li>Metronome and count-in.</li>
       <li>Exporting a mixdown as WAV, FLAC, MP3, Ogg or AAC.</li>
     </ul>
     <p>New in FontDaw:</p>
     <ul>
-      <li><strong>An audio file plays with the score.</strong> Use File &gt; Import audio track to put a WAV file on its own track. It plays in time with the score, has its own mixer strip, is included in the exported mixdown, and is saved in the project.</li>
+      <li><strong>An audio file plays with the score.</strong> Use File &gt; Import audio track to put a WAV, FLAC, MP3 or Ogg file on its own track. It shows up in the score as an audio staff with its waveform, plays in time with the score, has its own mixer strip, is included in the exported mixdown, and is saved in the project.</li>
       <li><strong>Faster export of parts.</strong> Exporting each part to its own audio file now renders all parts in one pass.</li>
       <li><strong>FontDaw's own name, settings and look.</strong> It is designed to run next to MuseScore Studio without sharing its settings, and it makes no connection to MuseScore's online services. Some texts in the program still say MuseScore Studio.</li>
     </ul>
     <p>Be aware that we have worked out what "works" mostly by reading the code, not by testing every feature in a running build. Some entries may turn out to be less finished than listed.</p>
     <h2 id="what-is-not-there-yet">What is not there yet</h2>
     <ul>
-      <li>A timeline view with tracks and waveforms. Audio tracks exist, but there is no panel to see them.</li>
+      <li>A separate timeline view with tracks. Audio tracks show up in the score as audio staves, but there is no timeline panel yet.</li>
       <li>Editing audio: moving, trimming, splitting, fades, clip gain.</li>
-      <li>Audio formats other than WAV.</li>
+      <li>Audio formats other than WAV, FLAC, MP3 and Ogg, such as AAC and AIFF.</li>
       <li>Recording from a microphone or instrument.</li>
       <li>Stretching audio to the score's tempo.</li>
       <li>A piano roll.</li>
@@ -49,7 +49,6 @@
     <ol>
       <li><strong>A timeline</strong> with the score's parts and audio tracks side by side, with waveforms, a moving playhead and click-to-seek.</li>
       <li><strong>Audio editing</strong> on that timeline: move, trim, split, fade, clip gain and snapping to the bars, all with undo.</li>
-      <li><strong>More audio formats:</strong> FLAC, MP3 and Ogg.</li>
       <li><strong>Safer saving</strong> of projects that contain a lot of audio.</li>
       <li><strong>Beat matching:</strong> stretching a recording to the score's tempo without changing its pitch.</li>
       <li><strong>Recording:</strong> audio input from the sound card, monitoring, and latency compensation.</li>

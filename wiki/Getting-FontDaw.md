@@ -25,7 +25,7 @@ We have not tested FontDaw on specific system versions, so we cannot give minimu
 1. Clone the source with its submodules (`git clone --recurse-submodules`).
 2. Install a recent C++ compiler: GCC 14 or newer, or Clang 20 or newer.
 3. Install CMake 3.28 or newer.
-4. Install Qt 6.10 with the modules qt5compat, qtnetworkauth, qtshadertools and qtwebsockets, and make sure `qmake6` or `qmake` is on your path.
+4. Install Qt 6.11 with the modules qt5compat, qtnetworkauth, qtshadertools and qtwebsockets, and make sure `qmake6` or `qmake` is on your path.
 5. Install the OpenGL, EGL and xkbcommon development packages (on Debian or Ubuntu: `libgl-dev`, `libegl-dev`, `libxkbcommon-dev`).
 6. From the top folder, run `cmake -P build.cmake -DCMAKE_BUILD_TYPE=Release -DMUSE_MODULE_VST=ON`. The build folder appears under `builds/`. The last option switches on VST3 support, which is off by default.
 

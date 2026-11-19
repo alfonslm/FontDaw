@@ -7,13 +7,13 @@ Most of the features that work come from MuseScore Studio. We have so far confir
 ## Project and timeline
 
 - **Works:** a project file that holds the score, imported audio and the mixer state; tempo map and time signatures; autosave and backups; project templates.
-- **In progress:** the position display shows bars and beats and minutes and seconds, but there is no time ruler yet. Undo and redo cover the score but not yet changes to audio tracks. Markers and regions are partly there.
+- **In progress:** the position display shows bars and beats and minutes and seconds, but there is no time ruler yet. Undo and redo cover the score and audio edits, in one history. Markers and regions are partly there.
 - There is no timeline view yet.
 
 ## Tracks
 
 - **Works:** instrument tracks driven by the notation.
-- **In progress:** audio tracks. You can import a WAV file onto its own track (see [Audio tracks](Audio-tracks)). The track plays from the start of the score as one whole file.
+- **In progress:** audio tracks. You can import an audio file onto its own track (see [Audio tracks](Audio-tracks)). It shows up in the score as an audio staff and plays from the start of the score as one whole file.
 
 ## Audio recording
 
@@ -22,7 +22,8 @@ Most of the features that work come from MuseScore Studio. We have so far confir
 
 ## Audio editing
 
-- **In progress:** importing audio (WAV only so far). Clip gain, fades, and moving, trimming and splitting clips are prepared behind the scenes, but you cannot use them yet. There is no waveform display.
+- **Works:** importing audio (WAV, FLAC, MP3 and Ogg). The waveform is shown on an audio staff in the score.
+- **In progress:** clip gain, fades, and moving, trimming and splitting clips are prepared behind the scenes, but you cannot use them yet.
 
 ## MIDI
 

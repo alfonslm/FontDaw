@@ -19,15 +19,15 @@
     <h1>Audio tracks</h1>
     <p>How to put an audio file next to your score. This is the first DAW feature in FontDaw and it is limited. A timeline view and clip editing are planned.</p>
     <h2 id="importing-a-file">Importing a file</h2>
-    <p>Choose <strong>File &gt; Import audio track</strong> and pick a WAV file. It gets its own track and plays from the start of the score, in time with it.</p>
+    <p>Choose <strong>File &gt; Import audio track</strong> and pick a WAV, FLAC, MP3 or Ogg file. It gets its own track and shows up in the score as an audio staff with its waveform, in every view and in print. It plays from the start of the score, in time with it. If you insert or delete bars, the audio moves with them.</p>
     <p>The audio is stored inside the project file. Linking to the file on disk instead is prepared but has no setting yet.</p>
     <h2 id="playing-mixing-and-exporting">Playing, mixing and exporting</h2>
     <p>The audio track has its own strip in the mixer, so you can set volume and pan, mute or solo it and add effects. It is included when you export a mixdown. It is saved with the project and comes back when you reopen it. The single-file <code>.mscx</code> format cannot hold audio, so it is saved without it.</p>
     <h2 id="what-does-not-work-yet">What does not work yet</h2>
     <ul>
-      <li>Only WAV files. FLAC, MP3 and Ogg are planned.</li>
+      <li>Only WAV, FLAC, MP3 and Ogg (Vorbis or Opus) files, mono or stereo. AAC/M4A, AIFF and others are not supported yet.</li>
       <li>The audio always starts at the beginning of the score. You cannot move, trim or split it yet.</li>
-      <li>There is no waveform or timeline to look at.</li>
+      <li>There is no separate timeline view yet. The waveform is shown on the audio staff in the score.</li>
       <li>The audio is not stretched to the score's tempo (beat matching is planned).</li>
     </ul>
   </main>

@@ -10,7 +10,7 @@ FontDaw is free software, based on MuseScore Studio. It keeps MuseScore's notati
 
 FontDaw is in early development. The version is 0.1.0 and **there is nothing to download yet**.
 
-Today you can write and print scores as in MuseScore Studio, and you can import a WAV file so that it plays in time with the score. Recording, a timeline view and audio editing are not there yet. [Status and roadmap](Status-and-roadmap) has the details.
+Today you can write and print scores as in MuseScore Studio, and you can import an audio file (WAV, FLAC, MP3 or Ogg) that shows up in the score as an audio staff and plays in time with it. Recording, a timeline view and most audio editing are not there yet. [Status and roadmap](Status-and-roadmap) has the details.
 
 ## Where to go next
 
