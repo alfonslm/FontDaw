@@ -14,7 +14,19 @@
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
-<main class="page">
+<a class="skip-link" href="#content">Skip to content</a>
+<!-- The same header as the wiki pages (tools/build_site.py, site_header); keep the two the same. -->
+<header class="site-header">
+  <a class="site-home" href="index.html" aria-current="page"><img src="icons/favicon.svg" alt="" width="28" height="28"><span>FontDaw</span></a>
+  <nav class="site-nav" aria-label="Site">
+    <ul>
+      <li><a href="wiki/index.html">Wiki</a></li>
+      <li><a href="wiki/Dev-Diary.html">Dev diary</a></li>
+      <li><a href="wiki/About-the-developer.html">About</a></li>
+    </ul>
+  </nav>
+</header>
+<main id="content" class="page">
   <header class="intro">
     <svg class="mark" viewBox="0 0 176 56" role="img" aria-labelledby="mark-title">
       <title id="mark-title">A staff with a G major arpeggio in 6/8, root, fifth, third, ending in a final barline, after which a sound wave begins</title>

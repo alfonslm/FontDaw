@@ -10,12 +10,20 @@
 <link rel="stylesheet" href="../style.css">
 </head>
 <body class="wiki-body">
-<header class="wiki-header">
-  <a class="wiki-home" href="../index.html"><img src="../icons/favicon.svg" alt="" width="28" height="28"><span>FontDaw</span></a>
-  <a class="wiki-jump" href="#wiki-nav">All wiki pages</a>
+<a class="skip-link" href="#content">Skip to content</a>
+<header class="site-header">
+  <a class="site-home" href="../index.html"><img src="../icons/favicon.svg" alt="" width="28" height="28"><span>FontDaw</span></a>
+  <nav class="site-nav" aria-label="Site">
+    <ul>
+      <li><a href="../wiki/index.html" aria-current="true">Wiki</a></li>
+      <li><a href="../wiki/Dev-Diary.html">Dev diary</a></li>
+      <li><a href="../wiki/About-the-developer.html">About</a></li>
+    </ul>
+  </nav>
 </header>
 <div class="wiki">
-  <main class="wiki-content">
+  <main id="content" class="wiki-content">
+    <p class="wiki-jump"><a href="#wiki-nav">All wiki pages</a></p>
     <h1>Settings</h1>
     <p>Where to change how FontDaw sounds and looks. Open the <strong>Preferences</strong> dialog. Its pages are General, Appearance, Canvas, Save &amp; publish, Note input, Score, Audio &amp; MIDI, MIDI mappings, Video, Percussion, Import, Shortcuts, Folders, Advanced and Braille. Settings are inherited from MuseScore Studio unless said otherwise.</p>
     <h2 id="audio-and-midi">Audio and MIDI</h2>
