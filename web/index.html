@@ -69,10 +69,9 @@
       <li class="goal">
         <span class="visually-hidden">Planned: </span><strong>Audio tracks next to the score.</strong> Import recordings and backing tracks and play them in sync with the notation.
         <ul class="checklist sub">
-          <li class="sub-goal is-done"><span class="visually-hidden">Done: </span>Import WAV files and play them in time with the score</li>
-          <li class="sub-goal"><span class="visually-hidden">Planned: </span>Import FLAC, MP3 and Ogg files</li>
+          <li class="sub-goal is-done"><span class="visually-hidden">Done: </span>Import WAV, FLAC, MP3, Ogg and Opus files and play them in time with the score</li>
           <li class="sub-goal is-done"><span class="visually-hidden">Done: </span>Waveform shown on an audio staff in the score</li>
-          <li class="sub-goal"><span class="visually-hidden">Planned: </span>Audio staves in page view, in print and in PDFs</li>
+          <li class="sub-goal is-done"><span class="visually-hidden">Done: </span>Audio staves in every view of the score and in print</li>
           <li class="sub-goal"><span class="visually-hidden">Planned: </span>Playback locked to the score, following tempo changes</li>
         </ul>
       </li>
@@ -110,7 +109,7 @@
           <li class="sub-goal"><span class="visually-hidden">Planned: </span>Plugin delay compensation</li>
           <li class="sub-goal"><span class="visually-hidden">Planned: </span>Automation lanes on the timeline</li>
           <li class="sub-goal"><span class="visually-hidden">Planned: </span>Buses and sidechains</li>
-          <li class="sub-goal"><span class="visually-hidden">Planned: </span>VST instruments that follow the score's tempo and position, also through fermatas and caesuras</li>
+          <li class="sub-goal is-done"><span class="visually-hidden">Done: </span>VST instruments that follow the score as it starts, stops and jumps</li>
         </ul>
       </li>
       <li class="goal">
@@ -120,14 +119,14 @@
           <li class="sub-goal is-done"><span class="visually-hidden">Done: </span>One file per part, rendered in parallel: up to 5× faster</li>
           <li class="sub-goal"><span class="visually-hidden">Planned: </span>Audio tracks included in every export</li>
           <li class="sub-goal"><span class="visually-hidden">Planned: </span>Bit depth, dither and loudness options</li>
-          <li class="sub-goal"><span class="visually-hidden">Planned: </span>MIDI export that keeps fermatas and caesuras as real pauses</li>
+          <li class="sub-goal is-done"><span class="visually-hidden">Done: </span>MIDI export that keeps fermatas and caesuras as real pauses</li>
         </ul>
       </li>
       <li class="goal">
         <span class="visually-hidden">Planned: </span><strong>Quick to work with.</strong> Commands where your hands already are.
         <ul class="checklist sub">
-          <li class="sub-goal"><span class="visually-hidden">Planned: </span>A pointer menu and a ring menu at the mouse for quick commands</li>
-          <li class="sub-goal"><span class="visually-hidden">Planned: </span>Shortcut layouts for one hand on the mouse and for both hands on the keyboard, next to MuseScore's own</li>
+          <li class="sub-goal is-done"><span class="visually-hidden">Done: </span>A ring menu on right-click and a command menu for quick commands</li>
+          <li class="sub-goal"><span class="visually-hidden">Planned: </span>Shortcut layouts of your own, and FontDaw's own layout for one hand on the mouse, next to MuseScore's</li>
         </ul>
       </li>
       <li class="goal">
@@ -139,6 +138,252 @@
         </ul>
       </li>
     </ul>
+    <!-- FEATURE-LIST START -->
+    <details class="more">
+      <summary>Planned, not started yet</summary>
+      <p class="more-note">Things we want FontDaw to do that no work has started on. Nothing here is a promise of a date.</p>
+      <h3>Project and timeline</h3>
+      <ul class="plain-list">
+        <li>A timeline view with tracks and clips</li>
+        <li>Building a tempo map from a recording</li>
+      </ul>
+      <h3>Tracks</h3>
+      <ul class="plain-list">
+        <li>Folder and group tracks</li>
+        <li>Freeze or bounce a track to audio</li>
+        <li>MIDI tracks without notation</li>
+      </ul>
+      <h3>Recording</h3>
+      <ul class="plain-list">
+        <li>Recording from the sound card: arm, record, stop, and the clip lands on the beat</li>
+        <li>Hearing the input while recording</li>
+        <li>Latency compensation for recordings</li>
+        <li>Loop recording with takes and comping, pre-roll, punch in and out</li>
+      </ul>
+      <h3>Audio editing</h3>
+      <ul class="plain-list">
+        <li>Moving clips directly in the score</li>
+        <li>Snap to bars and beats</li>
+        <li>Beat matching: stretch a recording to the score&#x27;s tempo without changing its pitch, with beat markers</li>
+        <li>Audio that follows tempo changes and ritardandi</li>
+        <li>Pitch shift without changing speed</li>
+        <li>Normalise, reverse, silence</li>
+        <li>Sample-level and spectral editing</li>
+        <li>Damaged audio files keep their good parts and show where the damage is</li>
+        <li>“Locate missing audio” when files have moved</li>
+      </ul>
+      <h3>MIDI</h3>
+      <ul class="plain-list">
+        <li>Velocity and controller editing</li>
+        <li>Piano roll</li>
+      </ul>
+      <h3>Notation</h3>
+      <ul class="plain-list">
+        <li>A score view and a timeline view that stay in sync</li>
+        <li>Editing while the score plays</li>
+        <li>FontDaw&#x27;s own shortcut layout</li>
+        <li>A score repair assistant that brings older scores up to date in one place</li>
+        <li>A screen type setting per screen (LCD or OLED: black level and contrast)</li>
+      </ul>
+      <h3>Mixing</h3>
+      <ul class="plain-list">
+        <li>Plug-in delay compensation</li>
+        <li>Buses, submix groups and free routing</li>
+        <li>Loudness metering (LUFS)</li>
+        <li>Sidechain inputs</li>
+        <li>Surround and immersive formats</li>
+      </ul>
+      <h3>Mastering</h3>
+      <ul class="plain-list">
+        <li>A mastering mode: all tracks bounced, only the master chain live</li>
+        <li>Re-rendering only the tracks that changed</li>
+        <li>Loudness and true-peak meters next to the chain</li>
+      </ul>
+      <h3>Automation</h3>
+      <ul class="plain-list">
+        <li>Recording automation from fader moves</li>
+        <li>Plug-in parameter automation</li>
+      </ul>
+      <h3>Instruments and plug-ins</h3>
+      <ul class="plain-list">
+        <li>CLAP, LV2 and Audio Units</li>
+        <li>A plug-in preset browser</li>
+        <li>The SFZ sampler format</li>
+        <li>Built-in synths and drum machine</li>
+      </ul>
+      <h3>Audio engine and devices</h3>
+      <ul class="plain-list">
+        <li>Input through the same drivers</li>
+        <li>Several outputs, such as a headphone mix</li>
+      </ul>
+      <h3>Transport and sync</h3>
+      <ul class="plain-list">
+        <li>A record button</li>
+        <li>JACK transport, Ableton Link, MIDI clock and timecode, scrubbing</li>
+      </ul>
+      <h3>Export</h3>
+      <ul class="plain-list">
+        <li>Exporting a time range</li>
+        <li>Audio staves included when exporting a score</li>
+      </ul>
+      <h3>Video</h3>
+      <ul class="plain-list">
+        <li>A video track for scoring to picture</li>
+      </ul>
+    </details>
+    <details class="more">
+      <summary>The full feature list</summary>
+      <p class="more-note">Everything we count as a FontDaw feature, and how far each one has come. <strong>Works</strong>: usable today. <strong>Partly works</strong>: some of it is usable. <strong>In progress</strong>: work or design has started. <strong>Planned</strong>: not started.</p>
+      <h3>Project and timeline</h3>
+      <ul class="feature-list">
+        <li><span class="badge badge-works">Works</span> <span>Project file holding the score, audio and mixer settings</span></li>
+        <li><span class="badge badge-works">Works</span> <span>Tempo changes and time signatures</span></li>
+        <li><span class="badge badge-works">Works</span> <span>Autosave and backups</span></li>
+        <li><span class="badge badge-works">Works</span> <span>Project templates</span></li>
+        <li><span class="badge badge-partly">Partly works</span> <span>Position shown in bars and beats, and in minutes and seconds</span></li>
+        <li><span class="badge badge-partly">Partly works</span> <span>Undo and redo for every edit, audio edits included</span></li>
+        <li><span class="badge badge-partly">Partly works</span> <span>Markers and regions</span></li>
+        <li><span class="badge badge-planned">Planned</span> <span>A timeline view with tracks and clips</span></li>
+        <li><span class="badge badge-planned">Planned</span> <span>Building a tempo map from a recording</span></li>
+      </ul>
+      <h3>Tracks</h3>
+      <ul class="feature-list">
+        <li><span class="badge badge-partly">Partly works</span> <span>Audio tracks</span></li>
+        <li><span class="badge badge-progress">In progress</span> <span>Audio tracks as parts of their own</span></li>
+        <li><span class="badge badge-works">Works</span> <span>Instrument tracks played from the notation</span></li>
+        <li><span class="badge badge-progress">In progress</span> <span>Track templates and sound presets: a plug-in, its sound and its articulation map in one</span></li>
+        <li><span class="badge badge-planned">Planned</span> <span>Folder and group tracks</span></li>
+        <li><span class="badge badge-planned">Planned</span> <span>Freeze or bounce a track to audio</span></li>
+        <li><span class="badge badge-planned">Planned</span> <span>MIDI tracks without notation</span></li>
+      </ul>
+      <h3>Recording</h3>
+      <ul class="feature-list">
+        <li><span class="badge badge-works">Works</span> <span>Metronome and count-in</span></li>
+        <li><span class="badge badge-planned">Planned</span> <span>Recording from the sound card: arm, record, stop, and the clip lands on the beat</span></li>
+        <li><span class="badge badge-planned">Planned</span> <span>Hearing the input while recording</span></li>
+        <li><span class="badge badge-planned">Planned</span> <span>Latency compensation for recordings</span></li>
+        <li><span class="badge badge-planned">Planned</span> <span>Loop recording with takes and comping, pre-roll, punch in and out</span></li>
+      </ul>
+      <h3>Audio editing</h3>
+      <ul class="feature-list">
+        <li><span class="badge badge-works">Works</span> <span>Import WAV, FLAC, MP3, Ogg Vorbis and Opus files</span></li>
+        <li><span class="badge badge-partly">Partly works</span> <span>Waveform display</span></li>
+        <li><span class="badge badge-partly">Partly works</span> <span>Move, trim, split, duplicate and delete clips</span></li>
+        <li><span class="badge badge-partly">Partly works</span> <span>Clip volume</span></li>
+        <li><span class="badge badge-partly">Partly works</span> <span>Fades and crossfades</span></li>
+        <li><span class="badge badge-planned">Planned</span> <span>Moving clips directly in the score</span></li>
+        <li><span class="badge badge-planned">Planned</span> <span>Snap to bars and beats</span></li>
+        <li><span class="badge badge-planned">Planned</span> <span>Beat matching: stretch a recording to the score&#x27;s tempo without changing its pitch, with beat markers</span></li>
+        <li><span class="badge badge-planned">Planned</span> <span>Audio that follows tempo changes and ritardandi</span></li>
+        <li><span class="badge badge-planned">Planned</span> <span>Pitch shift without changing speed</span></li>
+        <li><span class="badge badge-planned">Planned</span> <span>Normalise, reverse, silence</span></li>
+        <li><span class="badge badge-planned">Planned</span> <span>Sample-level and spectral editing</span></li>
+        <li><span class="badge badge-planned">Planned</span> <span>Damaged audio files keep their good parts and show where the damage is</span></li>
+        <li><span class="badge badge-planned">Planned</span> <span>“Locate missing audio” when files have moved</span></li>
+      </ul>
+      <h3>MIDI</h3>
+      <ul class="feature-list">
+        <li><span class="badge badge-works">Works</span> <span>MIDI keyboard input</span></li>
+        <li><span class="badge badge-works">Works</span> <span>MIDI file import and export</span></li>
+        <li><span class="badge badge-works">Works</span> <span>MIDI export with real pauses: fermatas and caesuras played as written silence</span></li>
+        <li><span class="badge badge-works">Works</span> <span>MIDI remote control and MIDI learn</span></li>
+        <li><span class="badge badge-partly">Partly works</span> <span>Real-time MIDI recording</span></li>
+        <li><span class="badge badge-partly">Partly works</span> <span>MIDI out to hardware</span></li>
+        <li><span class="badge badge-partly">Partly works</span> <span>A performance layer: timing and velocity apart from the written notes</span></li>
+        <li><span class="badge badge-partly">Partly works</span> <span>Quantise</span></li>
+        <li><span class="badge badge-progress">In progress</span> <span>Articulation maps for sample libraries, with no keyswitch notes in the score</span></li>
+        <li><span class="badge badge-planned">Planned</span> <span>Velocity and controller editing</span></li>
+        <li><span class="badge badge-planned">Planned</span> <span>Piano roll</span></li>
+      </ul>
+      <h3>Notation</h3>
+      <ul class="feature-list">
+        <li><span class="badge badge-works">Works</span> <span>Full score editing, parts, engraving and printing</span></li>
+        <li><span class="badge badge-works">Works</span> <span>MusicXML, MEI, Guitar Pro and other import and export</span></li>
+        <li><span class="badge badge-works">Works</span> <span>Score and audio in sync, shown together in the score: audio staves in every view and in print</span></li>
+        <li><span class="badge badge-works">Works</span> <span>A ring menu on right-click, and a command menu</span></li>
+        <li><span class="badge badge-works">Works</span> <span>MuseScore&#x27;s shortcut layout as the default</span></li>
+        <li><span class="badge badge-partly">Partly works</span> <span>Hidden beats: pauses written as note values, held or silent (playback and MIDI export work; editing them in the score is planned)</span></li>
+        <li><span class="badge badge-progress">In progress</span> <span>Clearer menu labels, with icons and names</span></li>
+        <li><span class="badge badge-progress">In progress</span> <span>A new selection system: a soft glow shows what a click will act on</span></li>
+        <li><span class="badge badge-progress">In progress</span> <span>Shortcut layouts of your own</span></li>
+        <li><span class="badge badge-progress">In progress</span> <span>A time view, where one second always takes the same width, with its own zoom</span></li>
+        <li><span class="badge badge-progress">In progress</span> <span>Dark score pages, and a separate print view with a preview of the printed colours</span></li>
+        <li><span class="badge badge-planned">Planned</span> <span>A score view and a timeline view that stay in sync</span></li>
+        <li><span class="badge badge-planned">Planned</span> <span>Editing while the score plays</span></li>
+        <li><span class="badge badge-planned">Planned</span> <span>FontDaw&#x27;s own shortcut layout</span></li>
+        <li><span class="badge badge-planned">Planned</span> <span>A score repair assistant that brings older scores up to date in one place</span></li>
+        <li><span class="badge badge-planned">Planned</span> <span>A screen type setting per screen (LCD or OLED: black level and contrast)</span></li>
+      </ul>
+      <h3>Mixing</h3>
+      <ul class="feature-list">
+        <li><span class="badge badge-works">Works</span> <span>Volume, pan, mute and solo per channel</span></li>
+        <li><span class="badge badge-works">Works</span> <span>Insert effects per channel</span></li>
+        <li><span class="badge badge-works">Works</span> <span>Aux sends</span></li>
+        <li><span class="badge badge-works">Works</span> <span>Level meters</span></li>
+        <li><span class="badge badge-works">Works</span> <span>Master channel</span></li>
+        <li><span class="badge badge-partly">Partly works</span> <span>Built-in EQ, compressor, limiter and reverb</span></li>
+        <li><span class="badge badge-planned">Planned</span> <span>Plug-in delay compensation</span></li>
+        <li><span class="badge badge-planned">Planned</span> <span>Buses, submix groups and free routing</span></li>
+        <li><span class="badge badge-planned">Planned</span> <span>Loudness metering (LUFS)</span></li>
+        <li><span class="badge badge-planned">Planned</span> <span>Sidechain inputs</span></li>
+        <li><span class="badge badge-planned">Planned</span> <span>Surround and immersive formats</span></li>
+      </ul>
+      <h3>Mastering</h3>
+      <ul class="feature-list">
+        <li><span class="badge badge-works">Works</span> <span>An editing mode where everything stays live and editable</span></li>
+        <li><span class="badge badge-partly">Partly works</span> <span>A mastering chain on the master channel</span></li>
+        <li><span class="badge badge-planned">Planned</span> <span>A mastering mode: all tracks bounced, only the master chain live</span></li>
+        <li><span class="badge badge-planned">Planned</span> <span>Re-rendering only the tracks that changed</span></li>
+        <li><span class="badge badge-planned">Planned</span> <span>Loudness and true-peak meters next to the chain</span></li>
+      </ul>
+      <h3>Automation</h3>
+      <ul class="feature-list">
+        <li><span class="badge badge-works">Works</span> <span>Tempo automation</span></li>
+        <li><span class="badge badge-partly">Partly works</span> <span>Automation lanes</span></li>
+        <li><span class="badge badge-partly">Partly works</span> <span>Volume and pan automation (not yet confirmed)</span></li>
+        <li><span class="badge badge-planned">Planned</span> <span>Recording automation from fader moves</span></li>
+        <li><span class="badge badge-planned">Planned</span> <span>Plug-in parameter automation</span></li>
+      </ul>
+      <h3>Instruments and plug-ins</h3>
+      <ul class="feature-list">
+        <li><span class="badge badge-works">Works</span> <span>VST3 instruments and effects</span></li>
+        <li><span class="badge badge-works">Works</span> <span>Plug-in scanning that survives a crashing plug-in</span></li>
+        <li><span class="badge badge-works">Works</span> <span>SoundFont playback</span></li>
+        <li><span class="badge badge-works">Works</span> <span>VST instruments that follow the score as it starts, stops and jumps</span></li>
+        <li><span class="badge badge-planned">Planned</span> <span>CLAP, LV2 and Audio Units</span></li>
+        <li><span class="badge badge-planned">Planned</span> <span>A plug-in preset browser</span></li>
+        <li><span class="badge badge-planned">Planned</span> <span>The SFZ sampler format</span></li>
+        <li><span class="badge badge-planned">Planned</span> <span>Built-in synths and drum machine</span></li>
+      </ul>
+      <h3>Audio engine and devices</h3>
+      <ul class="feature-list">
+        <li><span class="badge badge-works">Works</span> <span>Output through WASAPI, ASIO, Core Audio, ALSA, PipeWire and JACK</span></li>
+        <li><span class="badge badge-works">Works</span> <span>Sample rate and buffer size settings</span></li>
+        <li><span class="badge badge-partly">Partly works</span> <span>Smooth playback while editing (large scores still redraw slowly; work on speed has started)</span></li>
+        <li><span class="badge badge-planned">Planned</span> <span>Input through the same drivers</span></li>
+        <li><span class="badge badge-planned">Planned</span> <span>Several outputs, such as a headphone mix</span></li>
+      </ul>
+      <h3>Transport and sync</h3>
+      <ul class="feature-list">
+        <li><span class="badge badge-works">Works</span> <span>Play, stop, rewind, seek and loop</span></li>
+        <li><span class="badge badge-planned">Planned</span> <span>A record button</span></li>
+        <li><span class="badge badge-planned">Planned</span> <span>JACK transport, Ableton Link, MIDI clock and timecode, scrubbing</span></li>
+      </ul>
+      <h3>Export</h3>
+      <ul class="feature-list">
+        <li><span class="badge badge-works">Works</span> <span>Mixdown to WAV, FLAC, MP3 and Ogg</span></li>
+        <li><span class="badge badge-works">Works</span> <span>Score video export</span></li>
+        <li><span class="badge badge-partly">Partly works</span> <span>Stems: one file per track</span></li>
+        <li><span class="badge badge-partly">Partly works</span> <span>Bit depth, dither and loudness target (not yet confirmed)</span></li>
+        <li><span class="badge badge-planned">Planned</span> <span>Exporting a time range</span></li>
+        <li><span class="badge badge-planned">Planned</span> <span>Audio staves included when exporting a score</span></li>
+      </ul>
+      <h3>Video</h3>
+      <ul class="feature-list">
+        <li><span class="badge badge-planned">Planned</span> <span>A video track for scoring to picture</span></li>
+      </ul>
+    </details>
+    <!-- FEATURE-LIST END -->
   </section>
 
   <p class="links">
