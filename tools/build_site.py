@@ -90,6 +90,16 @@ def inline(text):
     return re.sub(r"\x00(\d+)\x00", lambda m: codes[int(m.group(1))], text)
 
 
+def check_picture(src):
+    """A picture must be images/<file>, a plain file in wiki/images/; anything else stops the build."""
+    name = src[len("images/"):] if src.startswith("images/") else ""
+    if not re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9._-]*", name) or ".." in name:
+        sys.exit("picture %r: write it as images/<file name>, a file in wiki/images/" % src)
+    path = IMAGES / name
+    if path.is_symlink() or not path.is_file():
+        sys.exit("picture %r: wiki/images/%s is missing or not a plain file" % (src, name))
+
+
 def markdown(source):
     """Block-level Markdown to HTML. Returns (title, body html)."""
     out, para, items, kind = [], [], [], None
@@ -119,15 +129,13 @@ def markdown(source):
         elif photo:
             flush()
             alt, src = photo.groups()
-            if not (SRC / src).exists():
-                sys.exit("missing image: wiki/" + src)
+            check_picture(src)
             out.append('<figure class="photo">\n  <img src="%s" alt="%s" loading="lazy">\n</figure>'
                        % (html.escape(src), html.escape(alt)))
         elif image:
             flush()
             alt, src, caption = image.groups()
-            if not (SRC / src).exists():
-                sys.exit("missing image: wiki/" + src)
+            check_picture(src)
             figures += 1
             box = "original-%d" % figures
             out.append('<figure class="screenshot">\n  <a href="%s"><img src="%s" alt="%s" loading="lazy"></a>\n'
@@ -188,18 +196,19 @@ SITE_LINKS = [("Wiki", "wiki/index.html"), ("Dev diary", "wiki/Dev-Diary.html"),
 
 
 def site_header(prefix, current=None, exact=False):
-    """The header on every page: FontDaw (home), Wiki, Dev diary, About. web/index.html carries a
-    copy of it written by hand; keep the two the same."""
+    """The header on every page: FontDaw (home), Wiki, Dev diary, About. The front page gets the
+    same header, written between the SITE-HEADER markers in web/index.html (prefix "")."""
     links = []
     for title, href in SITE_LINKS:
         here = ""
         if title == current:  # "page" on the page itself, "true" for the section it is in
             here = ' aria-current="%s"' % ("page" if exact else "true")
         links.append('      <li><a href="%s%s"%s>%s</a></li>' % (prefix, href, here, title))
+    home = ' aria-current="page"' if current == "Home" else ""
     return ('<header class="site-header">\n'
-            '  <a class="site-home" href="%sindex.html"><img src="%sicons/favicon.svg" alt="" width="28" height="28"><span>FontDaw</span></a>\n'
+            '  <a class="site-home" href="%sindex.html"%s><img src="%sicons/favicon.svg" alt="" width="28" height="28"><span>FontDaw</span></a>\n'
             '  <nav class="site-nav" aria-label="Site">\n    <ul>\n%s\n    </ul>\n  </nav>\n</header>'
-            % (prefix, prefix, "\n".join(links)))
+            % (prefix, home, prefix, "\n".join(links)))
 
 
 TEMPLATE = """<!doctype html>
@@ -264,6 +273,15 @@ def main():
         old.unlink()
     for name, text in built.items():
         (OUT / name).write_text(text, encoding="utf-8")
+    # the front page's header, between its markers
+    front = ROOT / "web" / "index.html"
+    page = front.read_text(encoding="utf-8")
+    start, end = "<!-- SITE-HEADER START -->", "<!-- SITE-HEADER END -->"
+    if page.count(start) != 1 or page.count(end) != 1:
+        sys.exit("web/index.html must contain %s and %s once each" % (start, end))
+    head, rest = page.split(start, 1)
+    _, tail = rest.split(end, 1)
+    front.write_text(head + start + "\n" + site_header("", "Home") + "\n" + end + tail, encoding="utf-8")
     # pictures: web/wiki/images/ is a copy of wiki/images/
     shutil.rmtree(OUT / "images", ignore_errors=True)
     if IMAGES.exists():
