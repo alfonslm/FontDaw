@@ -43,7 +43,7 @@ The plan, in the order we expect to do it. The order may change.
 7. **Piano roll** with velocity and controller editing.
 8. **Mastering mode:** all tracks are rendered, and only the master channel's effect chain plays live. Editing a note then renders just that track again.
 
-Steps 1 to 3 have a written plan. Parts of step 2 already exist, such as clip volume and fades, and undo already covers audio edits.
+Steps 1 to 3 have a written plan. For step 2, clip volume, fades, and moving, trimming and splitting clips are prepared behind the scenes but not yet usable. Undo already covers audio edits.
 
 ## What 1.0 means
 

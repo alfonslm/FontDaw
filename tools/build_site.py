@@ -25,6 +25,9 @@
 # The converter covers the Markdown these pages use: headings, paragraphs, bulleted and numbered
 # lists, **bold**, *italic*, `code` and links, and pictures on a line of their own, written
 # ![what the picture shows](images/name.png "caption"); the pictures live in web/wiki/images/.
+# A screenshot (with a caption) is shown with light and dark swapped in the dark theme, with an
+# "Original" tick box; a photo, written without a caption, ![what it shows](images/name.jpg),
+# is always shown as it is.
 # Run it after changing wiki/ and commit the result.
 # The Pages workflow publishes web/ as it is.
 
@@ -106,9 +109,17 @@ def markdown(source):
         heading = re.match(r"^(#{1,3})\s+(.*)$", stripped)
         bullet = re.match(r"^[-*]\s+(.*)$", stripped)
         image = re.match(r'^!\[([^\]]*)\]\((\S+)\s+"([^"]*)"\)$', stripped)
+        photo = re.match(r'^!\[([^\]]*)\]\((\S+)\)$', stripped)
         number = re.match(r"^\d+\.\s+(.*)$", stripped)
         if not stripped:
             flush()
+        elif photo:
+            flush()
+            alt, src = photo.groups()
+            if not (OUT / src).exists():
+                sys.exit("missing image: web/wiki/" + src)
+            out.append('<figure class="photo">\n  <img src="%s" alt="%s" loading="lazy">\n</figure>'
+                       % (html.escape(src), html.escape(alt)))
         elif image:
             flush()
             alt, src, caption = image.groups()
@@ -116,7 +127,7 @@ def markdown(source):
                 sys.exit("missing image: web/wiki/" + src)
             figures += 1
             box = "original-%d" % figures
-            out.append('<figure>\n  <a href="%s"><img src="%s" alt="%s" loading="lazy"></a>\n'
+            out.append('<figure class="screenshot">\n  <a href="%s"><img src="%s" alt="%s" loading="lazy"></a>\n'
                        '  <label class="original-toggle" for="%s"><input type="checkbox" id="%s"> Original'
                        '<span class="visually-hidden"> colours of picture %d: %s</span></label>\n'
                        '  <figcaption>%s</figcaption>\n</figure>'
