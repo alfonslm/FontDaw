@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Settings – FontDaw wiki</title>
+<meta name="description" content="Where to change how FontDaw sounds and looks. Open the Preferences dialog. Its pages are General, Appearance, Canvas, Save &amp; publish, Note input, Score, Audio &amp; MIDI, MIDI mappings, Video, Percussion, Import, Shortcuts, Folders, Advanced and Braille. Settings are inherited from MuseScore Studio unless said otherwise.">
+<meta name="color-scheme" content="light dark">
+<link rel="icon" href="../icons/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../style.css">
+</head>
+<body class="wiki-body">
+<header class="wiki-header">
+  <a class="wiki-home" href="../index.html"><img src="../icons/favicon.svg" alt="" width="28" height="28"><span>FontDaw</span></a>
+  <a class="wiki-jump" href="#wiki-nav">All wiki pages</a>
+</header>
+<div class="wiki">
+  <main class="wiki-content">
+    <h1>Settings</h1>
+    <p>Where to change how FontDaw sounds and looks. Open the <strong>Preferences</strong> dialog. Its pages are General, Appearance, Canvas, Save &amp; publish, Note input, Score, Audio &amp; MIDI, MIDI mappings, Video, Percussion, Import, Shortcuts, Folders, Advanced and Braille. Settings are inherited from MuseScore Studio unless said otherwise.</p>
+    <h2 id="audio-and-midi">Audio and MIDI</h2>
+    <ul>
+      <li><strong>Audio driver.</strong> Shown only if your computer offers more than one. Then choose the <strong>Audio device</strong>.</li>
+      <li><strong>Buffer size</strong> and, on Linux only, <strong>Sample rate</strong>. The driver decides which values are offered.</li>
+      <li><strong>Output latency.</strong> When FontDaw can detect your device's output latency, it says so and lines the playback cursor up with the sound. If the cursor still looks early or late, use <strong>Additional output latency for this device</strong> (from -500 to 2000 ms). <strong>Display latency</strong> (0 to 500 ms) delays the on-screen cursor.</li>
+      <li><strong>MIDI input</strong> and <strong>MIDI output</strong>, and a tick box for MIDI 2.0 output if the receiver supports it.</li>
+      <li><strong>Playback quality:</strong> a tick box for a warmer instrument sound (basic SoundFont only).</li>
+      <li><strong>Mixer:</strong> a tick box that ties track mute to showing and hiding instruments in the Layout panel.</li>
+    </ul>
+    <p><em>Stub: advice on choosing a buffer size for your system.</em></p>
+    <h2 id="appearance">Appearance</h2>
+    <ul>
+      <li><strong>Theme:</strong> light or dark, or follow the system theme, plus a high-contrast option.</li>
+      <li><strong>Colours</strong> for accents, text and borders.</li>
+      <li><strong>App icon:</strong> <strong>Dark</strong> or <strong>Light</strong>. The tick box <strong>Follow system colour scheme</strong> is on by default, so the icon follows your system. If FontDaw cannot read the system's scheme, it uses the icon you chose. The icons are placeholders for now.</li>
+      <li><strong>Page:</strong> invert score colours, optionally only in the dark theme.</li>
+      <li><strong>Page colour and background</strong>, including a background image.</li>
+      <li><strong>App text:</strong> typeface and size.</li>
+      <li><strong>Reset appearance to default.</strong></li>
+    </ul>
+    <h2 id="video">Video</h2>
+    <p>The <strong>Video converter</strong> section shows whether FFmpeg was found and its version. <strong>Locate existing installation</strong> lets you choose its folder. See <a href="Installing-FFmpeg.html">Installing FFmpeg</a>.</p>
+    <h2 id="resetting">Resetting</h2>
+    <p><strong>Reset preferences</strong>, at the bottom left of the dialog, resets all app preferences and deletes your custom shortcuts. It does not delete scores.</p>
+    <p><em>Stub: exactly which settings survive a reset has not been checked.</em></p>
+  </main>
+  <nav id="wiki-nav" class="wiki-nav" aria-label="Wiki pages">
+    <h2 class="nav-title">Wiki pages</h2>
+    <h3 class="nav-group">Start</h3>
+    <ul>
+      <li><a href="index.html">Home</a></li>
+      <li><a href="Status-and-roadmap.html">Status and roadmap</a></li>
+      <li><a href="Getting-FontDaw.html">Getting FontDaw</a></li>
+      <li><a href="FontDaw-and-MuseScore.html">FontDaw and MuseScore</a></li>
+    </ul>
+    <h3 class="nav-group">Using FontDaw</h3>
+    <ul>
+      <li><a href="Features.html">Features</a></li>
+      <li><a href="Audio-tracks.html">Audio tracks</a></li>
+      <li><a href="Settings.html" aria-current="page">Settings</a></li>
+      <li><a href="Keyboard-shortcuts.html">Keyboard shortcuts</a></li>
+      <li><a href="Exporting.html">Exporting</a></li>
+      <li><a href="Plug-ins.html">Plug-ins and sounds</a></li>
+      <li><a href="Installing-FFmpeg.html">Installing FFmpeg</a></li>
+      <li><a href="Opening-newer-files.html">Opening newer files</a></li>
+      <li><a href="Opening-older-files.html">Opening older files</a></li>
+    </ul>
+    <h3 class="nav-group">Help</h3>
+    <ul>
+      <li><a href="FAQ.html">FAQ</a></li>
+      <li><a href="Get-help.html">Get help</a></li>
+      <li><a href="Report-a-problem.html">Report a problem</a></li>
+      <li><a href="Accessibility.html">Accessibility</a></li>
+      <li><a href="Privacy.html">Privacy</a></li>
+    </ul>
+    <h3 class="nav-group">Project</h3>
+    <ul>
+      <li><a href="Contribute.html">Contribute</a></li>
+      <li><a href="Licence-and-credits.html">Licence and credits</a></li>
+      <li><a href="About-the-developer.html">About the developer</a></li>
+      <li><a href="Dev-Diary.html">Dev diary</a></li>
+    </ul>
+  </nav>
+</div>
+<footer class="footer wiki-footer">
+  <p>Based on MuseScore Studio by MuseScore Limited and contributors. FontDaw is not affiliated with or endorsed by MuseScore Limited or Muse Group.</p>
+  <p>Free software under the GNU GPL v3. See <a href="Licence-and-credits.html">Licence and credits</a>.</p>
+</footer>
+</body>
+</html>

@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Audio tracks – FontDaw wiki</title>
+<meta name="description" content="How to put an audio file next to your score. This is the first DAW feature in FontDaw and it is limited. A timeline view and clip editing are planned.">
+<meta name="color-scheme" content="light dark">
+<link rel="icon" href="../icons/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../style.css">
+</head>
+<body class="wiki-body">
+<header class="wiki-header">
+  <a class="wiki-home" href="../index.html"><img src="../icons/favicon.svg" alt="" width="28" height="28"><span>FontDaw</span></a>
+  <a class="wiki-jump" href="#wiki-nav">All wiki pages</a>
+</header>
+<div class="wiki">
+  <main class="wiki-content">
+    <h1>Audio tracks</h1>
+    <p>How to put an audio file next to your score. This is the first DAW feature in FontDaw and it is limited. A timeline view and clip editing are planned.</p>
+    <h2 id="importing-a-file">Importing a file</h2>
+    <p>Choose <strong>File &gt; Import audio track</strong> and pick a WAV, FLAC, MP3 or Ogg file. It gets its own track and shows up in the score as an audio staff with its waveform, in every view and in print. It plays from the start of the score, in time with it. If you insert or delete bars, the audio moves with them.</p>
+    <p>The audio is stored inside the project file. Linking to the file on disk instead is prepared but has no setting yet.</p>
+    <h2 id="playing-mixing-and-exporting">Playing, mixing and exporting</h2>
+    <p>The audio track has its own strip in the mixer, so you can set volume and pan, mute or solo it and add effects. It is included when you export a mixdown. It is saved with the project and comes back when you reopen it. The single-file <code>.mscx</code> format cannot hold audio, so it is saved without it.</p>
+    <h2 id="what-does-not-work-yet">What does not work yet</h2>
+    <ul>
+      <li>Only WAV, FLAC, MP3 and Ogg (Vorbis or Opus) files, mono or stereo. AAC/M4A, AIFF and others are not supported yet.</li>
+      <li>The audio always starts at the beginning of the score. You cannot move, trim or split it yet.</li>
+      <li>There is no separate timeline view yet. The waveform is shown on the audio staff in the score.</li>
+      <li>The audio is not stretched to the score's tempo (beat matching is planned).</li>
+    </ul>
+  </main>
+  <nav id="wiki-nav" class="wiki-nav" aria-label="Wiki pages">
+    <h2 class="nav-title">Wiki pages</h2>
+    <h3 class="nav-group">Start</h3>
+    <ul>
+      <li><a href="index.html">Home</a></li>
+      <li><a href="Status-and-roadmap.html">Status and roadmap</a></li>
+      <li><a href="Getting-FontDaw.html">Getting FontDaw</a></li>
+      <li><a href="FontDaw-and-MuseScore.html">FontDaw and MuseScore</a></li>
+    </ul>
+    <h3 class="nav-group">Using FontDaw</h3>
+    <ul>
+      <li><a href="Features.html">Features</a></li>
+      <li><a href="Audio-tracks.html" aria-current="page">Audio tracks</a></li>
+      <li><a href="Settings.html">Settings</a></li>
+      <li><a href="Keyboard-shortcuts.html">Keyboard shortcuts</a></li>
+      <li><a href="Exporting.html">Exporting</a></li>
+      <li><a href="Plug-ins.html">Plug-ins and sounds</a></li>
+      <li><a href="Installing-FFmpeg.html">Installing FFmpeg</a></li>
+      <li><a href="Opening-newer-files.html">Opening newer files</a></li>
+      <li><a href="Opening-older-files.html">Opening older files</a></li>
+    </ul>
+    <h3 class="nav-group">Help</h3>
+    <ul>
+      <li><a href="FAQ.html">FAQ</a></li>
+      <li><a href="Get-help.html">Get help</a></li>
+      <li><a href="Report-a-problem.html">Report a problem</a></li>
+      <li><a href="Accessibility.html">Accessibility</a></li>
+      <li><a href="Privacy.html">Privacy</a></li>
+    </ul>
+    <h3 class="nav-group">Project</h3>
+    <ul>
+      <li><a href="Contribute.html">Contribute</a></li>
+      <li><a href="Licence-and-credits.html">Licence and credits</a></li>
+      <li><a href="About-the-developer.html">About the developer</a></li>
+      <li><a href="Dev-Diary.html">Dev diary</a></li>
+    </ul>
+  </nav>
+</div>
+<footer class="footer wiki-footer">
+  <p>Based on MuseScore Studio by MuseScore Limited and contributors. FontDaw is not affiliated with or endorsed by MuseScore Limited or Muse Group.</p>
+  <p>Free software under the GNU GPL v3. See <a href="Licence-and-credits.html">Licence and credits</a>.</p>
+</footer>
+</body>
+</html>

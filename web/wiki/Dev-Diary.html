@@ -1,0 +1,120 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Dev diary – FontDaw wiki</title>
+<meta name="description" content="What we have done on FontDaw, newest first. One entry for a day with notable progress. We write what changed for a user, and what did not work or is still open. Nothing here is a promise.">
+<meta name="color-scheme" content="light dark">
+<link rel="icon" href="../icons/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../style.css">
+</head>
+<body class="wiki-body">
+<header class="wiki-header">
+  <a class="wiki-home" href="../index.html"><img src="../icons/favicon.svg" alt="" width="28" height="28"><span>FontDaw</span></a>
+  <a class="wiki-jump" href="#wiki-nav">All wiki pages</a>
+</header>
+<div class="wiki">
+  <main class="wiki-content">
+    <h1>Dev diary</h1>
+    <p>What we have done on FontDaw, newest first. One entry for a day with notable progress. We write what changed for a user, and what did not work or is still open. Nothing here is a promise.</p>
+    <p>An entry about features that are only in development builds names the development build it describes. Once there are releases, entries name the release's version number instead.</p>
+    <h2 id="19-november-2026-audio-in-the-score">19 November 2026: audio in the score</h2>
+    <p><em>Development build 0.1.0, 19 November 2026.</em></p>
+    <p><strong>Audio is now part of the score.</strong> An audio track shows up in the score as an audio staff with its waveform, in every view and in print, and it plays in step with the notes. Insert or delete bars, and the audio moves with them. Besides WAV, you can now import FLAC, MP3, Ogg Vorbis and Opus files. Undo and redo cover audio edits too, in the same history as the score.</p>
+    <figure>
+      <a href="images/2026-11-19-01-audio-staff.png"><img src="images/2026-11-19-01-audio-staff.png" alt="A score for flute, violin and cello with a fourth staff below, labelled Groove, which shows a coloured waveform in each bar" loading="lazy"></a>
+      <label class="original-toggle" for="original-1"><input type="checkbox" id="original-1"> Original<span class="visually-hidden"> colours of picture 1: A score for flute, violin and cello with a fourth staff below, labelled Groove, which shows a coloured waveform in each bar</span></label>
+      <figcaption>An audio recording sits in the score as its own staff, right under the instruments, with its waveform drawn bar by bar. You can see where the beats fall against the written notes, so audio and notation line up on the same page. Development build 0.1.0, 19 November 2026.</figcaption>
+    </figure>
+    <figure>
+      <a href="images/2026-11-19-02-playback.png"><img src="images/2026-11-19-02-playback.png" alt="The same score during playback, with a blue vertical cursor in the third bar crossing all four staves, the audio staff included" loading="lazy"></a>
+      <label class="original-toggle" for="original-2"><input type="checkbox" id="original-2"> Original<span class="visually-hidden"> colours of picture 2: The same score during playback, with a blue vertical cursor in the third bar crossing all four staves, the audio staff included</span></label>
+      <figcaption>The same score during playback. The playback cursor runs through the notated staves and the audio staff together, because the recording plays in time with the score. Development build 0.1.0, 19 November 2026.</figcaption>
+    </figure>
+    <p><strong>Quicker commands.</strong> A right-click opens a ring menu around the note. A command menu finds any command when you type its name.</p>
+    <figure>
+      <a href="images/2026-11-19-03-ring-menu.png"><img src="images/2026-11-19-03-ring-menu.png" alt="A round menu around a selected violin note, with eight symbols around it for articulations, ties, delete and more" loading="lazy"></a>
+      <label class="original-toggle" for="original-3"><input type="checkbox" id="original-3"> Original<span class="visually-hidden"> colours of picture 3: A round menu around a selected violin note, with eight symbols around it for articulations, ties, delete and more</span></label>
+      <figcaption>Right-clicking a note opens a ring of the most useful actions around the pointer: articulations, note values, ties, delete. Pick one without travelling to a toolbar. The labels will get icons and names soon. Development build 0.1.0, 19 November 2026.</figcaption>
+    </figure>
+    <figure>
+      <a href="images/2026-11-19-04-command-menu.png"><img src="images/2026-11-19-04-command-menu.png" alt="A search box over the score with the word tie typed in, and a list of matching commands below it, the first being Tie with its keyboard shortcut" loading="lazy"></a>
+      <label class="original-toggle" for="original-4"><input type="checkbox" id="original-4"> Original<span class="visually-hidden"> colours of picture 4: A search box over the score with the word tie typed in, and a list of matching commands below it, the first being Tie with its keyboard shortcut</span></label>
+      <figcaption>The command menu (Tools, then Command menu) finds any command by typing part of its name, here “tie”, and shows its keyboard shortcut next to it. Handy when you don't remember where something lives in the menus. Development build 0.1.0, 19 November 2026.</figcaption>
+    </figure>
+    <p><em>Because these pictures come from a development build, the top bar shows a DevTools tab and a Diagnostics menu that a released version will not have.</em></p>
+    <p><strong>Newer foundations.</strong> FontDaw now runs on MuseScore's newest code, including its new shortcut system. MuseScore's current key layout is the default.</p>
+    <p><strong>Fixes.</strong></p>
+    <ul>
+      <li>Solo is no longer saved as mutes.</li>
+      <li>The mixer settings of audio tracks are saved.</li>
+      <li>Missing mixer strips are back.</li>
+      <li>VST instruments such as VOCALOID now follow the score when you start, stop or jump.</li>
+      <li>Quitting after using plug-ins no longer crashes.</li>
+      <li>Starting playback in a large score no longer crashes.</li>
+    </ul>
+    <p><strong>Being designed.</strong></p>
+    <ul>
+      <li>A new way of selecting, with a soft glow that shows what a click will act on.</li>
+      <li>Articulation maps for sample libraries, so you need no keyswitch notes in the score.</li>
+      <li>A Time view where one second always takes the same width.</li>
+      <li>Dark score pages, with a separate Print view that shows the printed colours.</li>
+    </ul>
+    <p><strong>What comes next.</strong> Audio tracks as parts of their own, then moving clips directly in the score.</p>
+    <h2 id="16-november-2026-the-first-week">16 November 2026: the first week</h2>
+    <p><strong>The goal.</strong> FontDaw is meant to become a notation-first DAW. The score stays at the centre of the project. Around it we want audio tracks, recording and mixing, so that you can write music in standard notation and record, arrange and mix audio next to it in one program. Many DAWs treat notation as an extra. Many notation programs treat audio as an extra. We want to start from the score.</p>
+    <p><strong>The groundwork.</strong> So far the work is plain groundwork, and not much of it is visible yet:</p>
+    <ul>
+      <li>The project builds, and its automated tests run and pass.</li>
+      <li>A project can now hold audio files on tracks of their own.</li>
+      <li>A first audio file plays in time with the score. Use File &gt; Import audio track to put a WAV file on its own track. It has a mixer strip and is included in the exported mixdown. It always starts at the beginning of the score, and you cannot edit it yet.</li>
+      <li>Exporting each part of a score to its own audio file got faster, because the parts are now rendered in one pass. On Linux with four cores, a 12-part demo score took 46 seconds before and about 11 seconds now (exported to MP3 with the basic SoundFont). The result is close to the old export but not identical.</li>
+      <li>The logos you see are placeholders. They mark the intent, and proper logos will replace them later.</li>
+    </ul>
+    <p><strong>What comes next.</strong> A plan is written and work has not started. First a timeline that shows the score's parts and the audio tracks side by side, then editing audio clips on it with undo, then more audio formats and safer saving of large projects. After that we expect beat matching and recording. <a href="Status-and-roadmap.html">Status and roadmap</a> has the order.</p>
+  </main>
+  <nav id="wiki-nav" class="wiki-nav" aria-label="Wiki pages">
+    <h2 class="nav-title">Wiki pages</h2>
+    <h3 class="nav-group">Start</h3>
+    <ul>
+      <li><a href="index.html">Home</a></li>
+      <li><a href="Status-and-roadmap.html">Status and roadmap</a></li>
+      <li><a href="Getting-FontDaw.html">Getting FontDaw</a></li>
+      <li><a href="FontDaw-and-MuseScore.html">FontDaw and MuseScore</a></li>
+    </ul>
+    <h3 class="nav-group">Using FontDaw</h3>
+    <ul>
+      <li><a href="Features.html">Features</a></li>
+      <li><a href="Audio-tracks.html">Audio tracks</a></li>
+      <li><a href="Settings.html">Settings</a></li>
+      <li><a href="Keyboard-shortcuts.html">Keyboard shortcuts</a></li>
+      <li><a href="Exporting.html">Exporting</a></li>
+      <li><a href="Plug-ins.html">Plug-ins and sounds</a></li>
+      <li><a href="Installing-FFmpeg.html">Installing FFmpeg</a></li>
+      <li><a href="Opening-newer-files.html">Opening newer files</a></li>
+      <li><a href="Opening-older-files.html">Opening older files</a></li>
+    </ul>
+    <h3 class="nav-group">Help</h3>
+    <ul>
+      <li><a href="FAQ.html">FAQ</a></li>
+      <li><a href="Get-help.html">Get help</a></li>
+      <li><a href="Report-a-problem.html">Report a problem</a></li>
+      <li><a href="Accessibility.html">Accessibility</a></li>
+      <li><a href="Privacy.html">Privacy</a></li>
+    </ul>
+    <h3 class="nav-group">Project</h3>
+    <ul>
+      <li><a href="Contribute.html">Contribute</a></li>
+      <li><a href="Licence-and-credits.html">Licence and credits</a></li>
+      <li><a href="About-the-developer.html">About the developer</a></li>
+      <li><a href="Dev-Diary.html" aria-current="page">Dev diary</a></li>
+    </ul>
+  </nav>
+</div>
+<footer class="footer wiki-footer">
+  <p>Based on MuseScore Studio by MuseScore Limited and contributors. FontDaw is not affiliated with or endorsed by MuseScore Limited or Muse Group.</p>
+  <p>Free software under the GNU GPL v3. See <a href="Licence-and-credits.html">Licence and credits</a>.</p>
+</footer>
+</body>
+</html>
