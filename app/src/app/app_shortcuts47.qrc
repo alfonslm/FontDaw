@@ -1,0 +1,6 @@
+<!-- FontDaw (FD-153): the MuseScore 4.7 shortcut layout, the file for Linux and Windows -->
+<RCC>
+    <qresource prefix="/">
+        <file alias="configs/data/shortcuts_musescore47.json">configs/data/shortcuts_musescore47.json</file>
+    </qresource>
+</RCC>

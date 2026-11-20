@@ -1,0 +1,432 @@
+/*
+ * SPDX-License-Identifier: GPL-3.0-only
+ * MuseScore-Studio-CLA-applies
+ *
+ * MuseScore Studio
+ * Music Composition & Notation
+ *
+ * Copyright (C) 2021 MuseScore Limited and others
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License version 3 as
+ * published by the Free Software Foundation.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
+#include "abstractaudiowriter.h"
+
+#include "arrangement/iarrangementcontroller.h"
+
+#include <QCoreApplication>
+#include <QFile>
+#include <QFileInfo>
+#include <QThread>
+
+#include "global/containers.h"
+#include "log.h"
+
+#include "audio/common/audioerrors.h"
+#include "global/async/notifylist.h"
+
+#include "notation/inotation.h"
+#include "notation/inotationparts.h"
+#include "engraving/dom/part.h"
+
+using namespace muse;
+using namespace muse::audio;
+using namespace mu::iex::audioexport;
+using namespace mu::project;
+using namespace mu::notation;
+
+std::vector<INotationWriter::UnitType> AbstractAudioWriter::supportedUnitTypes() const
+{
+    return { UnitType::PER_PART };
+}
+
+bool AbstractAudioWriter::supportsUnitType(UnitType unitType) const
+{
+    std::vector<UnitType> unitTypes = supportedUnitTypes();
+    return std::find(unitTypes.cbegin(), unitTypes.cend(), unitType) != unitTypes.cend();
+}
+
+Ret AbstractAudioWriter::write(INotationPtr, io::IODevice&, const Options& options)
+{
+    IF_ASSERT_FAILED(unitTypeFromOptions(options) != UnitType::MULTI_PART) {
+        return Ret(Ret::Code::NotSupported);
+    }
+
+    if (supportsUnitType(muse::value(options, OptionKey::UNIT_TYPE, Val(UnitType::PER_PAGE)).toEnum<UnitType>())) {
+        NOT_IMPLEMENTED;
+        return Ret(Ret::Code::NotImplemented);
+    }
+
+    NOT_SUPPORTED;
+    return Ret(Ret::Code::NotSupported);
+}
+
+Ret AbstractAudioWriter::writeList(const INotationPtrList&, io::IODevice&, const Options& options)
+{
+    IF_ASSERT_FAILED(unitTypeFromOptions(options) == UnitType::MULTI_PART) {
+        return Ret(Ret::Code::NotSupported);
+    }
+
+    if (supportsUnitType(muse::value(options, OptionKey::UNIT_TYPE, Val(UnitType::PER_PAGE)).toEnum<UnitType>())) {
+        NOT_IMPLEMENTED;
+        return Ret(Ret::Code::NotImplemented);
+    }
+
+    NOT_SUPPORTED;
+    return Ret(Ret::Code::NotSupported);
+}
+
+void AbstractAudioWriter::abort()
+{
+    muse::ContextInject<muse::audio::IPlayback> playback = { m_iocContext };
+    playback()->abortSavingAllSoundTracks();
+    m_writeRet = make_ret(Ret::Code::Cancel);
+    m_isCompleted = true;
+}
+
+muse::Progress* AbstractAudioWriter::progress()
+{
+    return &m_progress;
+}
+
+Ret AbstractAudioWriter::doWriteAndWait(INotationPtr notation,
+                                        io::IODevice& dstDevice,
+                                        const SoundTrackFormat& format,
+                                        const Options& options)
+{
+    //! NOTE Temporary fix for the context injection
+    m_iocContext = notation->iocContext();
+
+    muse::ContextInject<playback::IPlaybackController> playbackController = { m_iocContext };
+
+    //! NOTE Waiting for the audio system to start if it is not already running
+    while (!startAudioController()->isAudioStarted()) {
+        application()->processEvents();
+        QThread::yieldCurrentThread();
+    }
+
+    //! NOTE Playback (tracks and duration) loads asynchronously; rendering before it is
+    //! ready yields 0 tracks and 0 duration ("No audio to export"). Wait for it first.
+    while (!playbackController()->isPlaybackInited()) {
+        application()->processEvents();
+        QThread::yieldCurrentThread();
+    }
+
+    //! FontDaw: audio tracks (src/arrangement) are engine tracks of the same sequence, so the
+    //! mixdown includes them (a part's export leaves them out, see PlaybackController::updateSoloMuteStates),
+    //! and the exported length covers them (PlaybackController::totalPlayTime).
+    //! They are added after the instruments: wait until the engine has them all.
+    muse::ContextInject<arrangement::IArrangementController> arrangementController = { m_iocContext };
+    while (arrangementController() && !arrangementController()->isLoaded()) {
+        application()->processEvents();
+        QThread::yieldCurrentThread();
+    }
+
+    m_isCompleted = false;
+    m_writeRet = muse::Ret();
+
+    playbackController()->setNotation(notation);
+    playbackController()->setIsExportingAudio(true);
+
+    SoundTrackFormat actualFormat = format;
+
+    double leadingSilenceSec = muse::value(options, OptionKey::LEADING_SILENCE_SEC, Val(0.0)).toDouble();
+    actualFormat.leadingSilenceDuration = std::isfinite(leadingSilenceSec)
+                                          ? static_cast<msecs_t>(leadingSilenceSec) : msecs_t(0);
+
+    double trailingSilenceSec = muse::value(options, OptionKey::TRAILING_SILENCE_SEC, Val(0.0)).toDouble();
+    actualFormat.trailingSilenceDuration = std::isfinite(trailingSilenceSec)
+                                           ? static_cast<msecs_t>(trailingSilenceSec) : msecs_t(0);
+
+    doWrite(dstDevice, actualFormat);
+
+    const bool waitForCompletion = muse::value(options, OptionKey::WAIT_FOR_COMPLETION, Val(true)).toBool();
+    if (waitForCompletion) {
+        while (!m_isCompleted) {
+            application()->processEvents();
+            QThread::yieldCurrentThread();
+        }
+    }
+
+    return m_writeRet;
+}
+
+void AbstractAudioWriter::doWrite(io::IODevice& dstDevice, const SoundTrackFormat& format)
+{
+    muse::ContextInject<muse::audio::IPlayback> playbackInj = { m_iocContext };
+
+    const std::string processingOnlineSoundsMsg = trc("iex_audio", "Processing online sounds…");
+
+    muse::ContextInject<project::IProjectSession> projectSession = { m_iocContext };
+    m_notationForRestore = projectSession()->currentNotation();
+
+    auto restorePlaybackState = [this]() {
+        muse::ContextInject<playback::IPlaybackController> playbackController = { m_iocContext };
+        playbackController()->setIsExportingAudio(false);
+        playbackController()->setNotation(m_notationForRestore);
+    };
+
+    auto sendProgress = [this, processingOnlineSoundsMsg](int64_t current, int64_t total, SaveSoundTrackStage stage) {
+        switch (stage) {
+        case SaveSoundTrackStage::ProcessingOnlineSounds:
+            m_progress.progress(current, total, processingOnlineSoundsMsg);
+            break;
+        case SaveSoundTrackStage::WritingSoundTrack:
+        case SaveSoundTrackStage::Unknown:
+            m_progress.progress(current, total);
+            break;
+        case SaveSoundTrackStage::LoadingEffects:
+        case SaveSoundTrackStage::WritingSoundTrackFile:
+            // multi-file export only
+            break;
+        }
+    };
+
+    m_progress.start();
+
+    auto playback = playbackInj();
+
+    playback->saveSoundTrackProgressChanged()
+    .onReceive(this, [sendProgress](int64_t current, int64_t total, SaveSoundTrackStage stage) {
+        sendProgress(current, total, stage);
+    });
+
+    playback->saveSoundTrack(std::move(format), dstDevice)
+    .onResolve(this, [this, playback, restorePlaybackState](const bool /*result*/) {
+        LOGI() << "Successfully saved sound track";
+
+        restorePlaybackState();
+
+        m_writeRet = muse::make_ok();
+        m_isCompleted = true;
+        m_progress.finish(muse::make_ok());
+        playback->saveSoundTrackProgressChanged().disconnect(this);
+    })
+    .onReject(this, [this, playback, restorePlaybackState](int errorCode, const std::string& msg) {
+        restorePlaybackState();
+
+        m_writeRet = Ret(errorCode, msg);
+        m_isCompleted = true;
+        m_progress.finish(make_ret(errorCode, msg));
+        playback->saveSoundTrackProgressChanged().disconnect(this);
+    });
+}
+
+bool AbstractAudioWriter::supportsBatchPartExport() const
+{
+    //! NOTE "Multi-stem render" in the export dialog; off means one export per part, one after another
+    return configuration()->multiStemRender();
+}
+
+Ret AbstractAudioWriter::writeParts(INotationPtr masterNotation, const PartExportTargetList& targets, const Options& options)
+{
+    IF_ASSERT_FAILED(masterNotation) {
+        return Ret(Ret::Code::InternalError);
+    }
+
+    //! NOTE Temporary fix for the context injection
+    m_iocContext = masterNotation->iocContext();
+
+    muse::ContextInject<playback::IPlaybackController> playbackController = { m_iocContext };
+
+    //! NOTE Waiting for the audio system to start if it is not already running
+    while (!startAudioController()->isAudioStarted()) {
+        application()->processEvents();
+        QThread::yieldCurrentThread();
+    }
+
+    m_isCompleted = false;
+    m_writeRet = muse::Ret();
+
+    playbackController()->setNotation(masterNotation);
+    playbackController()->setIsExportingAudio(true);
+
+    //! NOTE Playback (tracks, instrumentTrackIdMap and duration) loads asynchronously for the
+    //! notation that was just set; wait for it before mapping the requested parts to tracks.
+    //! isPlaybackInited() comes first; the tracks (and so instrumentTrackIdMap) only arrive with isLoaded(),
+    //! e.g. for a score that was opened just before the export, as in the command-line converter.
+    while (!playbackController()->isPlaybackInited() || !playbackController()->isLoaded()) {
+        application()->processEvents();
+        QThread::yieldCurrentThread();
+    }
+
+    //! FontDaw: the audio tracks are added after the instruments; wait until the engine has them all
+    muse::ContextInject<arrangement::IArrangementController> arrangementController = { m_iocContext };
+    while (arrangementController() && !arrangementController()->isLoaded()) {
+        application()->processEvents();
+        QThread::yieldCurrentThread();
+    }
+
+    const playback::IPlaybackController::InstrumentTrackIdMap& instrumentTrackIdMap = playbackController()->instrumentTrackIdMap();
+
+    std::vector<muse::audio::SoundTrackTarget> engineTargets;
+    engineTargets.reserve(targets.size());
+    m_partsProgress.clear();
+
+    //! NOTE One engine target (one output file) per part, containing all of the part's tracks
+    //! (a part has several when it has instrument changes)
+    for (const PartExportTarget& target : targets) {
+        IF_ASSERT_FAILED(target.notation && target.device) {
+            continue;
+        }
+
+        muse::audio::SoundTrackTarget engineTarget;
+        engineTarget.dstDevice = target.device;
+
+        for (const mu::engraving::Part* part : target.notation->parts()->partList()) {
+            for (const mu::engraving::InstrumentTrackId& instrumentTrackId : part->instrumentTrackIdList()) {
+                auto it = instrumentTrackIdMap.find(instrumentTrackId);
+                if (it == instrumentTrackIdMap.cend()) {
+                    continue;
+                }
+
+                if (!muse::contains(engineTarget.trackIds, it->second)) {
+                    engineTarget.trackIds.push_back(it->second);
+                }
+            }
+        }
+
+        //! FontDaw: audio tracks belong to the full score only (no part), as in the per-part export
+        if (arrangementController() && target.notation == masterNotation) {
+            for (const arrangement::IArrangementController::AudioTrack& audioTrack : arrangementController()->audioTracks()) {
+                if (audioTrack.engineTrackId >= 0 && !muse::contains(engineTarget.trackIds, audioTrack.engineTrackId)) {
+                    engineTarget.trackIds.push_back(audioTrack.engineTrackId);
+                }
+            }
+        }
+
+        if (engineTarget.trackIds.empty()) {
+            LOGE() << "Could not find a mixer track for part: " << target.notation->name();
+            continue;
+        }
+
+        engineTargets.push_back(std::move(engineTarget));
+        m_partsProgress.push_back(target.progress);
+    }
+
+    if (engineTargets.empty()) {
+        //! NOTE Switch playback back to the notation the user has open, as doWriteParts() does after an export
+        muse::ContextInject<project::IProjectSession> projectSession = { m_iocContext };
+        playbackController()->setIsExportingAudio(false);
+        playbackController()->setNotation(projectSession()->currentNotation());
+        return make_ret(Err::NoAudioToExport);
+    }
+
+    SoundTrackFormat actualFormat = soundTrackFormat();
+
+    double leadingSilenceSec = muse::value(options, OptionKey::LEADING_SILENCE_SEC, Val(0.0)).toDouble();
+    actualFormat.leadingSilenceDuration = std::isfinite(leadingSilenceSec)
+                                          ? static_cast<msecs_t>(leadingSilenceSec) : msecs_t(0);
+
+    double trailingSilenceSec = muse::value(options, OptionKey::TRAILING_SILENCE_SEC, Val(0.0)).toDouble();
+    actualFormat.trailingSilenceDuration = std::isfinite(trailingSilenceSec)
+                                           ? static_cast<msecs_t>(trailingSilenceSec) : msecs_t(0);
+
+    doWriteParts(engineTargets, actualFormat);
+
+    const bool waitForCompletion = muse::value(options, OptionKey::WAIT_FOR_COMPLETION, Val(true)).toBool();
+    if (waitForCompletion) {
+        while (!m_isCompleted) {
+            application()->processEvents();
+            QThread::yieldCurrentThread();
+        }
+    }
+
+    return m_writeRet;
+}
+
+void AbstractAudioWriter::doWriteParts(const std::vector<muse::audio::SoundTrackTarget>& engineTargets, const SoundTrackFormat& format)
+{
+    muse::ContextInject<muse::audio::IPlayback> playbackInj = { m_iocContext };
+
+    const std::string processingOnlineSoundsMsg = trc("iex_audio", "Processing online sounds…");
+    const std::string loadingEffectsMsg = trc("iex_audio", "Loading effects…");
+
+    muse::ContextInject<project::IProjectSession> projectSession = { m_iocContext };
+    m_notationForRestore = projectSession()->currentNotation();
+
+    auto restorePlaybackState = [this]() {
+        muse::ContextInject<playback::IPlaybackController> playbackController = { m_iocContext };
+        playbackController()->setIsExportingAudio(false);
+        playbackController()->setNotation(m_notationForRestore);
+    };
+
+    auto sendProgress = [this, processingOnlineSoundsMsg, loadingEffectsMsg](int64_t current, int64_t total, SaveSoundTrackStage stage) {
+        switch (stage) {
+        case SaveSoundTrackStage::ProcessingOnlineSounds:
+            m_progress.progress(current, total, processingOnlineSoundsMsg);
+            break;
+        case SaveSoundTrackStage::LoadingEffects:
+            m_progress.progress(0, 100, loadingEffectsMsg);
+            break;
+        case SaveSoundTrackStage::WritingSoundTrackFile:
+            //! NOTE current = percent, total = file index
+            if (total >= 0 && static_cast<size_t>(total) < m_partsProgress.size()) {
+                m_partsProgress.at(static_cast<size_t>(total)).progress(current, 100);
+            }
+            break;
+        case SaveSoundTrackStage::WritingSoundTrack:
+        case SaveSoundTrackStage::Unknown:
+            m_progress.progress(current, total);
+            break;
+        }
+    };
+
+    m_progress.start();
+
+    auto playback = playbackInj();
+
+    playback->saveSoundTrackProgressChanged()
+    .onReceive(this, [sendProgress](int64_t current, int64_t total, SaveSoundTrackStage stage) {
+        sendProgress(current, total, stage);
+    });
+
+    SoundTracksExportOptions exportOptions;
+    exportOptions.idleUntilFirstNote = configuration()->idleUntilFirstNote();
+
+    playback->saveSoundTracks(format, engineTargets, exportOptions)
+    .onResolve(this, [this, playback, restorePlaybackState](const bool /*result*/) {
+        LOGI() << "Successfully saved sound tracks";
+
+        restorePlaybackState();
+
+        m_writeRet = muse::make_ok();
+        m_isCompleted = true;
+        m_progress.finish(muse::make_ok());
+        playback->saveSoundTrackProgressChanged().disconnect(this);
+    })
+    .onReject(this, [this, playback, restorePlaybackState](int errorCode, const std::string& msg) {
+        restorePlaybackState();
+
+        m_writeRet = Ret(errorCode, msg);
+        m_isCompleted = true;
+        m_progress.finish(make_ret(errorCode, msg));
+        playback->saveSoundTrackProgressChanged().disconnect(this);
+    });
+}
+
+INotationWriter::UnitType AbstractAudioWriter::unitTypeFromOptions(const Options& options) const
+{
+    std::vector<UnitType> supported = supportedUnitTypes();
+    IF_ASSERT_FAILED(!supported.empty()) {
+        return UnitType::PER_PART;
+    }
+
+    UnitType defaultUnitType = supported.front();
+    UnitType unitType = muse::value(options, OptionKey::UNIT_TYPE, Val(defaultUnitType)).toEnum<UnitType>();
+    if (!supportsUnitType(unitType)) {
+        return defaultUnitType;
+    }
+
+    return unitType;
+}

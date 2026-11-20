@@ -1,0 +1,5 @@
+// FontDaw: the app icon is the Dark variant (16, 24, 32, 48, 256 px), Batch 1 decision A-3.
+// The mscz/mscx file icons stay while FontDaw uses that format. The installer refers to icon indexes 0-2.
+IDI_ICON1   ICON  DISCARDABLE "FontDawIcon\\fontdaw-icon-dark.ico"
+IDI_ICON2   ICON  DISCARDABLE "MsczIcon\\MS4_MsczIcon.ico"
+IDI_ICON3   ICON  DISCARDABLE "MscxIcon\\MS4_MscxIcon.ico"

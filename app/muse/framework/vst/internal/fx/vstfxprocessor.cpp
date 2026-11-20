@@ -1,0 +1,179 @@
+/*
+ * SPDX-License-Identifier: GPL-3.0-only
+ * MuseScore-CLA-applies
+ *
+ * MuseScore Studio
+ * Music Composition & Notation
+ *
+ * Copyright (C) 2025 MuseScore Limited and others
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License version 3 as
+ * published by the Free Software Foundation.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
+#include "vstfxprocessor.h"
+
+#include "../vstprocesscontext.h"
+
+using namespace muse;
+using namespace muse::vst;
+using namespace muse::audio;
+using namespace muse::audioplugins;
+
+VstFxProcessor::VstFxProcessor(IVstPluginInstancePtr instance, const AudioFxParams& params)
+    : m_pluginPtr(instance),
+    m_vstAudioClient(std::make_unique<VstAudioClient>()),
+    m_params(params)
+{
+}
+
+void VstFxProcessor::init(const audio::OutputSpec& spec)
+{
+    IF_ASSERT_FAILED(spec.isValid()) {
+        return;
+    }
+
+    m_outputSpec = spec;
+
+    m_vstAudioClient->init(PluginType::Fx, m_pluginPtr);
+
+    auto onPluginLoaded = [this]() {
+        m_pluginPtr->updatePluginConfig(m_params.configuration);
+        m_vstAudioClient->setOutputSpec(m_outputSpec);
+        m_inited = true;
+    };
+
+    if (m_pluginPtr->isLoaded()) {
+        onPluginLoaded();
+    } else {
+        m_pluginPtr->loadingCompleted().onNotify(this, onPluginLoaded);
+    }
+
+    m_pluginPtr->pluginSettingsChanged().onReceive(this, [this](const muse::audio::AudioUnitConfig& newConfig) {
+        if (m_params.configuration == newConfig) {
+            return;
+        }
+
+        m_params.configuration = newConfig;
+        m_paramsChanges.send(m_params);
+    });
+}
+
+AudioFxType VstFxProcessor::type() const
+{
+    return muse::audio::AudioFxType::VstFx;
+}
+
+std::string VstFxProcessor::name() const
+{
+    std::string pname;
+    if (m_pluginPtr) {
+        pname = m_pluginPtr->name();
+    }
+
+    return "Vst/" + pname;
+}
+
+const AudioFxParams& VstFxProcessor::params() const
+{
+    return m_params;
+}
+
+async::Channel<AudioFxParams> VstFxProcessor::paramsChanged() const
+{
+    return m_paramsChanges;
+}
+
+void VstFxProcessor::setOutputSpec(const audio::OutputSpec& spec)
+{
+    m_outputSpec = spec;
+
+    if (m_inited) {
+        m_vstAudioClient->setOutputSpec(spec);
+    }
+}
+
+bool VstFxProcessor::active() const
+{
+    return m_params.active;
+}
+
+void VstFxProcessor::setActive(bool active)
+{
+    m_params.active = active;
+}
+
+void VstFxProcessor::setMode(const muse::audio::ProcessMode mode)
+{
+    m_vstAudioClient->setIsPlaying(muse::audio::isModePlaying(mode));
+    m_vstAudioClient->setIsOffline(mode == muse::audio::ProcessMode::PlayingOffline);
+}
+
+bool VstFxProcessor::shouldProcessDuringSilence() const
+{
+    return m_params.active && muse::contains(m_params.categories, AudioFxCategory::FxGenerator);
+}
+
+void VstFxProcessor::setPlayheadPosition(audio::engine::PlayheadPositionPtr playheadPosition)
+{
+    m_playheadPosition = playheadPosition;
+}
+
+void VstFxProcessor::process(float* buffer, samples_t sampleCount, samples_t playbackPositionSamples)
+{
+    if (!buffer || !m_inited) {
+        return;
+    }
+
+    audio::MusicalPosition musicalPosition;
+    if (m_playheadPosition) {
+        const audio::TimePosition& position = m_playheadPosition->currentPosition();
+        if (position.isValid()) {
+            musicalPosition = m_playheadPosition->musicalPosition(position);
+        }
+    }
+
+    double loopStart = 0.0;
+    double loopEnd = 0.0;
+    if (m_playheadPosition && loopInQuarters(*m_playheadPosition, m_outputSpec.sampleRate, loopStart, loopEnd)) {
+        m_vstAudioClient->setCycle(loopStart, loopEnd);
+    } else {
+        m_vstAudioClient->clearCycle();
+    }
+
+    VstTransportInfo clock;
+    if (m_playheadPosition) {
+        transportClockAt(*m_playheadPosition, 0, static_cast<double>(m_outputSpec.sampleRate), clock);
+    }
+    m_vstAudioClient->setTransportClock(clock);
+
+    m_vstAudioClient->process(buffer, sampleCount, playbackPositionSamples, musicalPosition);
+}
+
+//! Ready once the plugin instance has loaded; until then the processor passes audio through.
+bool VstFxProcessor::isReady() const
+{
+    return m_inited;
+}
+
+//! Deactivates and reactivates the plugin, which clears its audio state but keeps its settings.
+void VstFxProcessor::resetState()
+{
+    if (!m_inited) {
+        return;
+    }
+
+    //! NOTE Deactivating and reactivating is the VST3 way to make a plugin drop its internal
+    //! audio state (tails, envelopes); it keeps the plugin's settings.
+    m_vstAudioClient->setIsActive(false);
+    m_vstAudioClient->setIsActive(true);
+}

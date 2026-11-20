@@ -1,0 +1,169 @@
+/*
+ * SPDX-License-Identifier: GPL-3.0-only
+ * MuseScore-CLA-applies
+ *
+ * MuseScore Studio
+ * Music Composition & Notation
+ *
+ * Copyright (C) 2021 MuseScore Limited and others
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License version 3 as
+ * published by the Free Software Foundation.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+#include "vstmodule.h"
+
+#include "modularity/ioc.h"
+#include "audio/engine/isynthresolver.h"
+#include "audio/engine/ifxresolver.h"
+
+#include "audioplugins/iaudiopluginsscannerregister.h"
+#include "audioplugins/iaudiopluginmetareaderregister.h"
+
+#include "rcommand/icommandsregister.h"
+#include "rcommand/icommandsstate.h"
+
+#include "internal/vstconfiguration.h"
+#include "internal/vstinstancesregister.h"
+#include "internal/vstplugininstance.h"
+#include "internal/vstmodulesrepository.h"
+#include "internal/synth/vstiresolver.h"
+#include "internal/fx/vstfxresolver.h"
+#include "internal/vstpluginsscanner.h"
+#include "internal/vstpluginmetareader.h"
+#include "internal/vstactionscontroller.h"
+#include "internal/vstcommandsregister.h"
+#include "internal/vstcommandsstate.h"
+#include "internal/synth/keyswitchmapregistry.h"
+#include "internal/vsttrace.h"
+
+using namespace muse::vst;
+using namespace muse::modularity;
+using namespace muse::audio::synth;
+using namespace muse::audio::fx;
+using namespace muse::audio;
+using namespace muse::audioplugins;
+
+static const std::string mname("vst");
+
+std::string VSTModule::moduleName() const
+{
+    return mname;
+}
+
+void VSTModule::registerExports()
+{
+    m_configuration = std::make_shared<VstConfiguration>();
+    m_pluginModulesRepo = std::make_shared<VstModulesRepository>();
+    m_pluginInstancesRegister = std::make_shared<VstInstancesRegister>();
+
+    globalIoc()->registerExport<IVstConfiguration>(moduleName(), m_configuration);
+    globalIoc()->registerExport<IVstModulesRepository>(moduleName(), m_pluginModulesRepo);
+    globalIoc()->registerExport<IVstInstancesRegister>(moduleName(), m_pluginInstancesRegister);
+}
+
+void VSTModule::resolveImports()
+{
+    auto synthResolver = globalIoc()->resolve<ISynthResolver>(moduleName());
+    if (synthResolver) {
+        synthResolver->registerResolver(AudioSourceType::Vsti, std::make_shared<VstiResolver>());
+    }
+
+    auto fxResolver = globalIoc()->resolve<IFxResolver>(moduleName());
+    if (fxResolver) {
+        fxResolver->registerResolver(AudioFxType::VstFx, std::make_shared<VstFxResolver>());
+    }
+
+    auto scannerRegister = globalIoc()->resolve<IAudioPluginsScannerRegister>(moduleName());
+    if (scannerRegister) {
+        scannerRegister->registerScanner(std::make_shared<VstPluginsScanner>());
+    }
+
+    auto metaReaderRegister = globalIoc()->resolve<IAudioPluginMetaReaderRegister>(moduleName());
+    if (metaReaderRegister) {
+        metaReaderRegister->registerReader(std::make_shared<VstPluginMetaReader>());
+    }
+
+    auto cr = globalIoc()->resolve<muse::rcommand::ICommandsRegister>(mname);
+    if (cr) {
+        cr->reg(std::make_shared<VstCommandsRegister>());
+    }
+}
+
+void VSTModule::onInit(const IApplication::RunMode& mode)
+{
+    trace::start();
+
+    m_configuration->init();
+    m_pluginModulesRepo->init();
+
+    if (mode == IApplication::RunMode::GuiApp) {
+        KeyswitchMapRegistry::instance().ensureDefaultMapExists();
+    }
+}
+
+void VSTModule::onDeinit()
+{
+    //! NOTE: Release every plugin here, on the main thread and before main() returns, so that each
+    //! module's bundleExit / ModuleExit runs. A plugin whose module stays loaded until exit() can
+    //! crash in static destructors (e.g. Kontakt 8 on macOS).
+    //! PRECONDITION: the audio module is deinited before this one (the app registers AudioModule
+    //! before VSTModule), so the driver has stopped and the engine worker has been joined: nothing
+    //! calls process() any more, which VstPluginInstance::unload() requires. The engine has also
+    //! destroyed its synths and effects; their instances deferred the release to the main event
+    //! loop, which no longer runs.
+    VstPluginInstance::setShuttingDown();
+    VstPluginInstance::releaseDeferredResources();
+
+    //! Instances still alive: editors are closed, then each plugin is stopped and released
+    m_pluginInstancesRegister->unloadAll();
+    VstPluginInstance::releaseDeferredResources();
+
+    m_pluginModulesRepo->deInit();
+
+    trace::stop();
+}
+
+muse::modularity::IContextSetup* VSTModule::newContext(const muse::modularity::ContextPtr& ctx) const
+{
+    return new VSTContext(ctx);
+}
+
+void VSTContext::registerExports()
+{
+    //! NOTE Now we can switch which view to use in runtime.
+    //! switches the action controller, so registration is there now.
+    //! as soon as the new view is stabilized, we need to remove the old one and do as usual
+
+    // auto ir = globalIoc()->resolve<IInteractiveUriRegister>(mname);
+    // if (ir) {
+    //     ir->registerWidgetUri<VstViewDialog>(Uri("muse://vst/editor"));
+    //     ir->registerQmlUri(Uri("muse://vst/editor"), "Muse.Vst", "VstEditorDialog");
+    // }
+
+    m_actionsController = std::make_shared<VstActionsController>(iocContext());
+}
+
+void VSTContext::resolveImports()
+{
+    auto cs = ioc()->resolve<muse::rcommand::ICommandsState>(mname);
+    if (cs) {
+        cs->reg(std::make_shared<VstCommandsState>(iocContext()));
+    }
+}
+
+void VSTContext::onInit(const IApplication::RunMode& mode)
+{
+    if (mode == IApplication::RunMode::GuiApp) {
+        m_actionsController->init();
+        m_actionsController->setupUsedView();
+    }
+}

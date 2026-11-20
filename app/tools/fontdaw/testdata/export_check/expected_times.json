@@ -1,0 +1,22 @@
+{
+  "about": "Expected time of each hit of score.mscx in ms from the start, independent of the app's spos export. 'computed' values follow from the written tempo marks and the 0.5 s caesura pause alone; 'measured' values depend on the app's own model of the ritardando or the fermata and were read from the MIDI export's tempo track on main at 9b0767fb (17 November 2026). Re-measure only when the score changes or when a PR deliberately changes how a ritardando or a fermata is played; say so in that PR. See README.md, 'Expected times'.",
+  "hits": [
+    {"hit": "H01", "bar": 0, "beat": 1, "ms": 0.0,      "how": "computed: start"},
+    {"hit": "H02", "bar": 1, "beat": 1, "ms": 500.0,    "how": "computed: + 1 beat at 120"},
+    {"hit": "H03", "bar": 1, "beat": 3, "ms": 1500.0,   "how": "computed: + 2 beats at 120"},
+    {"hit": "H04", "bar": 2, "beat": 1, "ms": 2500.0,   "how": "computed: + 2 beats at 120"},
+    {"hit": "H05", "bar": 2, "beat": 3, "ms": 3500.0,   "how": "computed: + 2 beats at 120"},
+    {"hit": "H06", "bar": 3, "beat": 1, "ms": 4500.0,   "how": "computed: + 2 beats at 120"},
+    {"hit": "H07", "bar": 3, "beat": 3, "ms": 5833.333, "how": "computed: + 2 beats at 90"},
+    {"hit": "H08", "bar": 4, "beat": 1, "ms": 7166.667, "how": "computed: + 2 beats at 90"},
+    {"hit": "H09", "bar": 4, "beat": 3, "ms": 8567.46,  "how": "measured: inside the ritardando"},
+    {"hit": "H10", "bar": 4, "beat": 4, "ms": 9343.47,  "how": "measured: inside the ritardando"},
+    {"hit": "H11", "bar": 5, "beat": 1, "ms": 10180.40, "how": "measured: end of the ritardando"},
+    {"hit": "H12", "bar": 5, "beat": 3, "ms": 11513.733,"how": "computed: H11 + 2 beats at 90"},
+    {"hit": "H13", "bar": 5, "beat": 4, "ms": 12513.73, "how": "measured: after the fermata (H12 + 1000 ms)"},
+    {"hit": "H14", "bar": 6, "beat": 1, "ms": 13180.397,"how": "computed: H13 + 1 beat at 90"},
+    {"hit": "H15", "bar": 6, "beat": 2, "ms": 13847.063,"how": "computed: + 1 beat at 90"},
+    {"hit": "H16", "bar": 6, "beat": 3, "ms": 15013.73, "how": "computed: + 1 beat at 90 + the 0.5 s caesura"},
+    {"hit": "H17", "bar": 7, "beat": 1, "ms": 16347.063,"how": "computed: + 2 beats at 90"}
+  ]
+}

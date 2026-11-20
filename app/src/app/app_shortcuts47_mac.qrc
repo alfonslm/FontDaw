@@ -1,0 +1,6 @@
+<!-- FontDaw (FD-153): the MuseScore 4.7 shortcut layout, the file for macOS -->
+<RCC>
+    <qresource prefix="/">
+        <file alias="configs/data/shortcuts_musescore47.json">configs/data/shortcuts_musescore47_mac.json</file>
+    </qresource>
+</RCC>
