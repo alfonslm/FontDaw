@@ -1,0 +1,18 @@
+[Desktop Entry]
+# Write keys in the order specified in https://specifications.freedesktop.org/desktop-entry-spec/desktop-entry-spec-latest.html#recognized-keys
+# After editing, run this command to check for errors: $ desktop-file-validate [filename]
+# FontDaw: text is provisional (FD-044). Listing MimeType does not make FontDaw the default; the user chooses.
+Type=Application
+# Version of Desktop Entry Spec, not MuseScore version. Don't upgrade prematurely.
+Version=1.0
+Name=@DESKTOP_LAUNCHER_NAME@
+GenericName=Music notation and audio workstation
+Comment=Write scores, add audio tracks, play and mix them
+Icon=io.github.alfonslm.FontDaw@MUSE_APP_INSTALL_SUFFIX@
+Exec=fontdaw@MUSE_APP_INSTALL_SUFFIX@ %U
+Terminal=false
+MimeType=application/x-musescore;application/x-musescore+xml;application/vnd.recordare.musicxml;application/vnd.recordare.musicxml+xml;application/x-mei+xml;audio/midi;application/x-bww;application/x-biab;application/x-capella;audio/x-gtp;application/x-musedata;application/x-overture;audio/x-ptb;application/x-tef;application/x-sf2;application/x-sf3;
+Categories=AudioVideo;Audio;Graphics;2DGraphics;VectorGraphics;RasterGraphics;Publishing;Midi;Mixer;Sequencer;Music;Qt;
+Keywords=music;notation;score;sheet music;audio;DAW;mixing;recording;MIDI;musicxml;
+StartupNotify=true
+StartupWMClass=@WINDOW_MANAGER_CLASS@

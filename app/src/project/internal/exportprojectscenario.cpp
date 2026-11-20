@@ -1,0 +1,736 @@
+/*
+ * SPDX-License-Identifier: GPL-3.0-only
+ * MuseScore-Studio-CLA-applies
+ *
+ * MuseScore Studio
+ * Music Composition & Notation
+ *
+ * Copyright (C) 2021 MuseScore Limited and others
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License version 3 as
+ * published by the Free Software Foundation.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
+#include "exportprojectscenario.h"
+
+#include <memory>
+#include <thread>
+
+#include <QTimer>
+
+#include "global/io/fileinfo.h"
+#include "global/io/filestream.h"
+
+#include "translation.h"
+#include "log.h"
+
+#include "engraving/dom/score.h"
+
+#include "notation/iexcerptnotation.h" // IWYU pragma: keep
+#include "notation/imasternotation.h"
+#include "notation/inotation.h"
+#include "notation/inotationelements.h" // IWYU pragma: keep
+#include "notation/inotationpainting.h" // IWYU pragma: keep
+
+#include "inotationproject.h"
+#include "types/projecturis.h"
+
+using namespace muse;
+using namespace muse::io;
+using namespace mu::project;
+using namespace mu::notation;
+using muse::async::Promise;
+
+struct ExportProjectScenario::ExportState {
+    INotationPtrList notations;
+    std::vector<ViewMode> viewModes;
+
+    std::vector<ExportFile> files;
+    size_t currentFileIndex = 0;
+    bool isCurrentFileConfirmed = false; // the user agreed to replace or retry the current file
+    FileConflictPolicy fileConflictPolicy = FileConflictPolicy::Undefined;
+
+    muse::io::path_t destinationPath;
+    bool openDestinationFolderOnExport = false;
+
+    Progress* writerProgress = nullptr;
+    Promise<Ret>::Resolve resolve;
+
+    //! NOTE FontDaw (parallel export): a writer that supports INotationWriter::supportsBatchPartExport()
+    //! writes all parts in one writer->writeParts() call. The files are still confirmed one by one
+    //! (replace, skip); the confirmed ones are collected here and written together at the end
+    bool isBatchPartExport = false;
+    bool showFilesProgress = false;
+    INotationWriterPtr writer;
+    INotationWriter::Options options;
+    std::vector<size_t> batchFileIndexes;
+
+    void moveToNextFile()
+    {
+        ++currentFileIndex;
+        isCurrentFileConfirmed = false;
+    }
+};
+
+std::vector<INotationWriter::UnitType> ExportProjectScenario::supportedUnitTypes(const ExportType& exportType) const
+{
+    IF_ASSERT_FAILED(!exportType.suffixes.isEmpty()) {
+        return {};
+    }
+
+    auto writer = writers()->writer(exportType.suffixes.front().toStdString());
+    if (!writer) {
+        return {};
+    }
+
+    return writer->supportedUnitTypes();
+}
+
+RetVal<muse::io::path_t> ExportProjectScenario::askExportPath(const INotationPtrList& notations, const ExportType& exportType,
+                                                              INotationWriter::UnitType unitType, muse::io::path_t defaultDirPath) const
+{
+    INotationProjectPtr project = context()->project();
+
+    std::string filenameAddition;
+
+    // If only one file will be created, the filename will be exactly what the user
+    // types in the save dialog and therefore we can put the file dialog in charge of
+    // asking the user whether an existing file should be overridden. Otherwise, we
+    // will take care of that ourselves.
+    bool isCreatingOnlyOneFile = guessIsCreatingOnlyOneFile(notations, unitType);
+    bool isExportingOnlyOneScore = notations.size() == 1;
+
+    if (unitType == INotationWriter::UnitType::MULTI_PART && !isExportingOnlyOneScore) {
+        bool containsMaster = std::find_if(notations.cbegin(), notations.cend(), [this](INotationPtr notation) {
+            return isMainNotation(notation);
+        }) != notations.cend();
+
+        if (containsMaster) {
+            //: Used in export filename suggestion. Please use only characters that are valid for filenames.
+            filenameAddition = "-" + muse::trc("project/export", "Score_and_Parts");
+        } else {
+            //: Used in export filename suggestion. Please use only characters that are valid for filenames.
+            filenameAddition = "-" + muse::trc("project/export", "Parts");
+        }
+    } else if (isExportingOnlyOneScore) {
+        if (!isMainNotation(notations.front())) {
+            filenameAddition = "-" + io::escapeFileName(notations.front()->name()).toStdString();
+        }
+
+        if (unitType == INotationWriter::UnitType::PER_PAGE && isCreatingOnlyOneFile) {
+            // So there is only one page
+            filenameAddition += "-1";
+        }
+    }
+
+    muse::io::path_t defaultPath;
+    if (defaultDirPath == "") {
+        defaultPath = configuration()->defaultSavingFilePath(project, filenameAddition, exportType.suffixes.front().toStdString());
+    } else {
+        defaultPath = defaultDirPath.appendingComponent(io::filename(project->path(), false) + filenameAddition)
+                      .appendingSuffix(exportType.suffixes.front().toStdString());
+    }
+
+    RetVal<muse::io::path_t> exportPath;
+    exportPath.val = interactive()->selectSavingFileSync(muse::trc("project/export", "Export"), defaultPath,
+                                                         exportType.filter(), isCreatingOnlyOneFile);
+    exportPath.ret = !exportPath.val.empty();
+
+    return exportPath;
+}
+
+Promise<Ret> ExportProjectScenario::exportScores(notation::INotationPtrList notations, const muse::io::path_t destinationPath,
+                                                 INotationWriter::UnitType unitType, bool openDestinationFolderOnExport) const
+{
+    return async::make_promise<Ret>([this, notations, destinationPath, unitType, openDestinationFolderOnExport](auto resolve) {
+        m_pendingExports.push_back([this, notations, destinationPath, unitType, openDestinationFolderOnExport, resolve]() {
+            startExport(notations, destinationPath, unitType, openDestinationFolderOnExport, resolve);
+        });
+
+        //! NOTE The exports go one after another, so that they do not change the view modes of each other.
+        //! The resolve is lost if it is called before the caller subscribes to the promise,
+        //! so an export always starts on the next event loop
+        if (!m_isExporting) {
+            m_isExporting = true;
+            startNextExportLater();
+        }
+
+        return Promise<Ret>::dummy_result();
+    }, async::PromiseType::AsyncByBody);
+}
+
+void ExportProjectScenario::startNextExportLater() const
+{
+    QTimer::singleShot(0, &m_timersContext, [this]() {
+        if (m_pendingExports.empty()) {
+            m_isExporting = false;
+            return;
+        }
+
+        std::function<void()> start = std::move(m_pendingExports.front());
+        m_pendingExports.pop_front();
+        start();
+    });
+}
+
+void ExportProjectScenario::startExport(const notation::INotationPtrList& notations, const muse::io::path_t& destinationPath,
+                                        INotationWriter::UnitType unitType, bool openDestinationFolderOnExport,
+                                        const Promise<Ret>::Resolve& resolve) const
+{
+    std::string suffix = io::suffix(destinationPath);
+    INotationWriterPtr writer = writers()->writer(suffix);
+
+    if (!writer) {
+        (void)resolve(make_ret(Ret::Code::NotSupported));
+        startNextExportLater();
+        return;
+    }
+
+    IF_ASSERT_FAILED(writer->supportsUnitType(unitType)) {
+        (void)resolve(make_ret(Ret::Code::NotSupported));
+        startNextExportLater();
+        return;
+    }
+
+    // Make sure we do this in the same as we did it in `askExportPath`, so before initializing notations
+    bool isCreatingOnlyOneFile = guessIsCreatingOnlyOneFile(notations, unitType);
+
+    // The user might have selected not-yet-inited excerpts
+    ExcerptNotationList excerptsToInit;
+    ExcerptNotationList potentialExcerpts = masterNotation()->potentialExcerpts();
+
+    for (const INotationPtr& notation : notations) {
+        auto it = std::find_if(potentialExcerpts.cbegin(), potentialExcerpts.cend(), [notation](const IExcerptNotationPtr& excerpt) {
+            return excerpt->notation() == notation;
+        });
+
+        if (it != potentialExcerpts.cend()) {
+            excerptsToInit.push_back(*it);
+        }
+    }
+
+    masterNotation()->initExcerpts(excerptsToInit);
+
+    // Scores that are closed may have never been laid out, so we lay them out now
+    for (const INotationPtr& notation : notations) {
+        mu::engraving::Score* score = notation->elements()->msScore();
+        if (!score->autoLayoutEnabled()) {
+            score->doLayout();
+        }
+    }
+
+    auto state = std::make_shared<ExportState>();
+    state->notations = notations;
+    state->destinationPath = destinationPath;
+    state->openDestinationFolderOnExport = openDestinationFolderOnExport;
+
+    // Backup view modes
+    state->viewModes = viewModes(notations);
+    setViewModes(notations, ViewMode::PAGE);
+
+    state->files = exportFiles(notations, destinationPath, writer, unitType, isCreatingOnlyOneFile);
+
+    //! NOTE FontDaw: when a writer can render several notations at the same time (currently only audio),
+    //! take that path instead of doing a full separate write() per notation: it behaves like a single
+    //! export operation (one progress cycle), same as MULTI_PART. Parts sharing instruments and the
+    //! full score are fine: every track is still rendered only once (see ParallelSoundTrackWriter)
+    state->isBatchPartExport = unitType == INotationWriter::UnitType::PER_PART
+                               && writer->supportsBatchPartExport() && notations.size() > 1;
+    if (state->isBatchPartExport) {
+        state->writer = writer;
+        state->options = { { INotationWriter::OptionKey::UNIT_TYPE, Val(unitType) } };
+        state->showFilesProgress = isAudioExport(suffix);
+    }
+
+    // If isCreatingOnlyOneFile, the save dialog has already asked whether to replace
+    // any existing files. If the user cancels, the filepath will be empty, so we would
+    // not reach this point. But if we do, existing files should be overridden.
+    state->fileConflictPolicy = isCreatingOnlyOneFile ? FileConflictPolicy::ReplaceAll : FileConflictPolicy::Undefined;
+
+    state->writerProgress = writer->progress();
+    if (state->writerProgress) {
+        //! NOTE FontDaw: a multi-file audio export shows its own progress dialog, with a bar per file (see doExportPartsInOnePass)
+        if (!(state->isBatchPartExport && state->showFilesProgress)) {
+            showExportProgress(isAudioExport(suffix));
+        }
+        m_exportProgress.start();
+
+        state->writerProgress->progressChanged().onReceive(this, [this, state](int64_t current, int64_t total, const std::string& status) {
+            if (state->isBatchPartExport) {
+                m_exportProgress.progress(current, total, status);
+                return;
+            }
+            m_exportProgress.progress(state->currentFileIndex * total + current, state->files.size() * total, status);
+        }, async::Asyncable::Mode::SetReplace);
+
+        m_exportProgress.canceled().onNotify(this, [writer]() {
+            writer->abort();
+        }, muse::async::Asyncable::Mode::SetReplace);
+    }
+
+    state->resolve = resolve;
+    exportNextFiles(state);
+}
+
+const ExportInfo& ExportProjectScenario::exportInfo() const
+{
+    return m_exportInfo;
+}
+
+void ExportProjectScenario::setExportInfo(const ExportInfo& exportInfo)
+{
+    m_exportInfo = exportInfo;
+}
+
+bool ExportProjectScenario::guessIsCreatingOnlyOneFile(const notation::INotationPtrList& notations,
+                                                       INotationWriter::UnitType unitType) const
+{
+    switch (unitType) {
+    case INotationWriter::UnitType::PER_PAGE: {
+        if (notations.size() == 1) {
+            INotationPtr notation = notations.front();
+
+            // Check if it is not a potential (not-yet-initialized) excerpt
+            ExcerptNotationList potentialExcerpts = masterNotation()->potentialExcerpts();
+
+            auto it = std::find_if(potentialExcerpts.cbegin(), potentialExcerpts.cend(), [notation](const IExcerptNotationPtr& excerpt) {
+                    return excerpt->notation() == notation;
+                });
+
+            if (it == potentialExcerpts.cend()) {
+                ViewMode viewMode = notation->painting()->viewMode();
+                notation->painting()->setViewMode(ViewMode::PAGE);
+
+                bool onePage = notations.front()->elements()->pages().size() == 1;
+
+                notation->painting()->setViewMode(viewMode);
+
+                return onePage;
+            }
+        }
+
+        return false;
+    };
+    case INotationWriter::UnitType::PER_PART:
+        return notations.size() == 1;
+    case INotationWriter::UnitType::MULTI_PART:
+        return true;
+    }
+
+    return false;
+}
+
+std::vector<ExportProjectScenario::ExportFile> ExportProjectScenario::exportFiles(const INotationPtrList& notations,
+                                                                                  const muse::io::path_t& destinationPath,
+                                                                                  INotationWriterPtr writer,
+                                                                                  INotationWriter::UnitType unitType,
+                                                                                  bool isCreatingOnlyOneFile) const
+{
+    std::vector<ExportFile> files;
+
+    bool isExportingOnlyOneScore = notations.size() == 1;
+
+    INotationWriter::Options options {
+        { INotationWriter::OptionKey::UNIT_TYPE, Val(unitType) },
+    };
+
+    switch (unitType) {
+    case INotationWriter::UnitType::PER_PAGE: {
+        for (const INotationPtr& notation : notations) {
+            size_t pageCount = notation->elements()->msScore()->pages().size();
+            bool isMain = isMainNotation(notation);
+
+            for (size_t page = 0; page < pageCount; ++page) {
+                options[INotationWriter::OptionKey::PAGE_NUMBER] = Val(static_cast<int>(page));
+
+                muse::io::path_t definitivePath = isCreatingOnlyOneFile
+                                                  ? destinationPath
+                                                  : completeExportPath(destinationPath, notation, isMain, isExportingOnlyOneScore,
+                                                                       static_cast<int>(page));
+
+                files.push_back({ definitivePath, [writer, notation, options](IODevice& destinationDevice) {
+                            return writer->write(notation, destinationDevice, options);
+                        } });
+            }
+        }
+    } break;
+    case INotationWriter::UnitType::PER_PART: {
+        for (const INotationPtr& notation : notations) {
+            muse::io::path_t definitivePath = isCreatingOnlyOneFile
+                                              ? destinationPath
+                                              : completeExportPath(destinationPath, notation, isMainNotation(
+                                                                       notation), isExportingOnlyOneScore);
+
+            files.push_back({ definitivePath, [writer, notation, options](IODevice& destinationDevice) {
+                        return writer->write(notation, destinationDevice, options);
+                    }, notation });
+        }
+    } break;
+    case INotationWriter::UnitType::MULTI_PART: {
+        files.push_back({ destinationPath, [writer, notations, options](IODevice& destinationDevice) {
+                    return writer->writeList(notations, destinationDevice, options);
+                } });
+    } break;
+    }
+
+    return files;
+}
+
+bool ExportProjectScenario::isMainNotation(INotationPtr notation) const
+{
+    return masterNotation()->notation() == notation;
+}
+
+IMasterNotationPtr ExportProjectScenario::masterNotation() const
+{
+    return context()->masterNotation();
+}
+
+muse::io::path_t ExportProjectScenario::completeExportPath(const muse::io::path_t& basePath, INotationPtr notation, bool isMain,
+                                                           bool isExportingOnlyOneScore, int pageIndex) const
+{
+    muse::io::path_t result = io::dirpath(basePath) + "/" + io::completeBasename(basePath);
+
+    if (!isMain && !isExportingOnlyOneScore) {
+        result += "-" + io::escapeFileName(notation->name()).toStdString();
+    }
+
+    if (pageIndex > -1) {
+        result += "-" + std::to_string(pageIndex + 1);
+    }
+
+    result += "." + io::suffix(basePath);
+
+    return result;
+}
+
+void ExportProjectScenario::exportNextFiles(const ExportStatePtr& state) const
+{
+    while (state->currentFileIndex < state->files.size()) {
+        const ExportFile& file = state->files.at(state->currentFileIndex);
+
+        if (!state->isCurrentFileConfirmed && fileSystem()->exists(file.path)) {
+            if (state->fileConflictPolicy == FileConflictPolicy::Undefined) {
+                askForReplaceFile(state);
+                return;
+            }
+
+            if (state->fileConflictPolicy == FileConflictPolicy::SkipAll) {
+                state->moveToNextFile();
+                continue;
+            }
+        }
+
+        if (state->isBatchPartExport) {
+            // FontDaw: confirmed; written together with the others below
+            state->batchFileIndexes.push_back(state->currentFileIndex);
+            state->moveToNextFile();
+            continue;
+        }
+
+        Ret ret = writeFile(file);
+        if (ret) {
+            state->moveToNextFile();
+            continue;
+        }
+
+        if (ret.code() == static_cast<int>(Ret::Code::Cancel)) {
+            finishExport(state, ret);
+            return;
+        }
+
+        askForRetry(state);
+        return;
+    }
+
+    //! NOTE FontDaw: write the confirmed parts of a batch part export together
+    if (state->isBatchPartExport && !state->batchFileIndexes.empty()) {
+        Ret ret = writeBatchPartFiles(state);
+        if (!ret && ret.code() != static_cast<int>(Ret::Code::Cancel)) {
+            LOGE() << "Audio export of the parts failed: " << ret.toString();
+            askForRetry(state);
+            return;
+        }
+
+        finishExport(state, ret);
+        return;
+    }
+
+    //! NOTE FontDaw: also reached by a batch part export whose files were all skipped
+    //! (the user declined to replace them): nothing to do
+    finishExport(state, muse::make_ok());
+}
+
+Ret ExportProjectScenario::writeBatchPartFiles(const ExportStatePtr& state) const
+{
+    std::vector<INotationPtr> notations;
+    std::vector<muse::io::path_t> filePaths;
+    for (size_t index : state->batchFileIndexes) {
+        notations.push_back(state->files.at(index).notation);
+        filePaths.push_back(state->files.at(index).path);
+    }
+
+    return doExportPartsInOnePass(state->writer, notations, filePaths, state->options, state->showFilesProgress);
+}
+
+void ExportProjectScenario::finishExport(const ExportStatePtr& state, const Ret& ret) const
+{
+    // Restore view modes
+    setViewModes(state->notations, state->viewModes);
+
+    if (state->writerProgress) {
+        m_exportProgress.finish(muse::make_ok());
+        state->writerProgress->progressChanged().disconnect(this);
+        m_exportProgress.canceled().disconnect(this);
+    }
+
+    if (ret && state->openDestinationFolderOnExport) {
+        openFolder(state->destinationPath);
+    }
+
+    (void)state->resolve(ret);
+
+    startNextExportLater();
+}
+
+void ExportProjectScenario::askForReplaceFile(const ExportStatePtr& state) const
+{
+    constexpr int Replace = static_cast<int>(IInteractive::Button::CustomButton) + 1;
+    constexpr int ReplaceAll = static_cast<int>(IInteractive::Button::CustomButton) + 2;
+    constexpr int Skip = static_cast<int>(IInteractive::Button::CustomButton) + 3;
+    constexpr int SkipAll = static_cast<int>(IInteractive::Button::CustomButton) + 4;
+
+    const String filename = FileInfo(state->files.at(state->currentFileIndex).path).fileName();
+
+    interactive()->question(
+        muse::trc("project/export", "File already exists"),
+        muse::qtrc("project/export", "A file already exists with the filename %1. Do you want to replace it?")
+        .arg(filename).toStdString(), {
+        IInteractive::ButtonData(Replace, muse::trc("project/export", "Replace")),
+        IInteractive::ButtonData(ReplaceAll, muse::trc("project/export", "Replace all")),
+        IInteractive::ButtonData(Skip, muse::trc("project/export", "Skip")),
+        IInteractive::ButtonData(SkipAll, muse::trc("project/export", "Skip all"))
+    })
+    .onResolve(this, [this, state](const IInteractive::Result& result) {
+        switch (result.button()) {
+            case ReplaceAll:
+                state->fileConflictPolicy = FileConflictPolicy::ReplaceAll; // fallthrough
+            case Replace:
+                state->isCurrentFileConfirmed = true;
+                break;
+            case SkipAll:
+                state->fileConflictPolicy = FileConflictPolicy::SkipAll; // fallthrough
+            case Skip:
+            default:
+                state->moveToNextFile();
+                break;
+        }
+
+        continueExportLater(state);
+    });
+}
+
+void ExportProjectScenario::askForRetry(const ExportStatePtr& state) const
+{
+    //! NOTE FontDaw: a failed batch part export is retried as a whole, named by its first file
+    const size_t fileIndex = state->isBatchPartExport && state->currentFileIndex >= state->files.size()
+                             ? state->batchFileIndexes.front() : state->currentFileIndex;
+    const String filename = FileInfo(state->files.at(fileIndex).path).fileName();
+
+    interactive()->question(
+        muse::trc("project/export", "Error"),
+        muse::qtrc("project/export", "An error occurred while writing the file %1. Do you want to retry?")
+        .arg(filename).toStdString(), { IInteractive::Button::Retry, IInteractive::Button::Abort })
+    .onResolve(this, [this, state](const IInteractive::Result& result) {
+        if (result.standardButton() != IInteractive::Button::Retry) {
+            finishExport(state, make_ret(Ret::Code::Cancel));
+            return;
+        }
+
+        state->isCurrentFileConfirmed = true;
+        continueExportLater(state);
+    });
+}
+
+void ExportProjectScenario::continueExportLater(const ExportStatePtr& state) const
+{
+    //! NOTE The writers may process events deep inside (e.g. the audio export),
+    //! which can't be done neither in Async's callback nor while the question dialog is being closed,
+    //! so continue the export on the next event loop
+    QTimer::singleShot(0, &m_timersContext, [this, state]() {
+        exportNextFiles(state);
+    });
+}
+
+Ret ExportProjectScenario::writeFile(const ExportFile& file) const
+{
+    //! NOTE Most writers stream to the destination device (file on disk).
+    //! But there is one atypical case:
+    //! Export score to unpacked directory - creates a directory and writes files to it
+
+    // Remove previous file because we need to know whether
+    // exportFunction writes at path
+    Ret ret = fileSystem()->remove(file.path);
+    if (!ret) {
+        return ret;
+    }
+
+    FileStream outputFile(file.path);
+    outputFile.setMeta("file_path", file.path.toStdString());
+    if (!outputFile.open(IODevice::WriteOnly)) {
+        return make_ret(Ret::Code::UnknownError);
+    }
+
+    ret = file.exportFunction(outputFile);
+    outputFile.close();
+
+    if (ret.code() == static_cast<int>(Ret::Code::Cancel)) {
+        const bool isFileMode = fileSystem()->exists(file.path);
+        if (!isFileMode) {
+            return ret;
+        }
+
+        // On Windows, remove() may fail immediately after close()
+        // because the file lock has not been released yet
+        for (int i = 0; i < 10; ++i) {
+            if (fileSystem()->remove(file.path)) {
+                return ret;
+            }
+
+            std::this_thread::sleep_for(std::chrono::milliseconds(100));
+        }
+    }
+
+    return ret;
+}
+
+Ret ExportProjectScenario::doExportPartsInOnePass(INotationWriterPtr writer, const std::vector<INotationPtr>& notations,
+                                                  const std::vector<muse::io::path_t>& filePaths,
+                                                  const INotationWriter::Options& options, bool showFilesProgress) const
+{
+    IF_ASSERT_FAILED(notations.size() == filePaths.size()) {
+        return make_ret(Ret::Code::InternalError);
+    }
+
+    m_exportFilesProgress.clear();
+
+    std::vector<std::unique_ptr<FileStream> > files;
+    files.reserve(notations.size());
+
+    //! NOTE A failed or cancelled export leaves incomplete files behind: remove them, like doExportLoop() does
+    auto removeFiles = [this, &files, &filePaths]() {
+        for (auto& file : files) {
+            file->close();
+        }
+
+        for (size_t i = 0; i < files.size(); ++i) {
+            fileSystem()->remove(filePaths.at(i));
+        }
+    };
+
+    INotationWriter::PartExportTargetList targets;
+    targets.reserve(notations.size());
+
+    for (size_t i = 0; i < notations.size(); ++i) {
+        const muse::io::path_t& path = filePaths.at(i);
+
+        Ret ret = fileSystem()->remove(path);
+        if (!ret) {
+            removeFiles();
+            return ret;
+        }
+
+        auto file = std::make_unique<FileStream>(path);
+        file->setMeta("file_path", path.toStdString());
+        if (!file->open(IODevice::WriteOnly)) {
+            removeFiles();
+            return make_ret(Ret::Code::InternalError);
+        }
+
+        muse::Progress fileProgress;
+        fileProgress.start();
+        m_exportFilesProgress.push_back({ notations.at(i)->name(), fileProgress });
+
+        targets.push_back({ notations.at(i), file.get(), fileProgress });
+        files.push_back(std::move(file));
+    }
+
+    if (showFilesProgress) {
+        interactive()->open(AUDIO_EXPORT_PROGRESS_URI);
+    }
+
+    Ret ret = writer->writeParts(masterNotation()->notation(), targets, options);
+    if (!ret) {
+        removeFiles();
+        return ret;
+    }
+
+    for (auto& file : files) {
+        file->close();
+    }
+
+    return ret;
+}
+
+muse::Progress ExportProjectScenario::exportProgress() const
+{
+    return m_exportProgress;
+}
+
+const ExportFilesProgress& ExportProjectScenario::exportFilesProgress() const
+{
+    return m_exportFilesProgress;
+}
+
+void ExportProjectScenario::showExportProgress(bool isAudioExport) const
+{
+    std::string title = isAudioExport ? muse::trc("project/export", "Exporting audio…") : muse::trc("project/export", "Exporting…");
+
+    interactive()->showProgress(title, m_exportProgress);
+}
+
+void ExportProjectScenario::openFolder(const muse::io::path_t& path) const
+{
+    Ret ret = platformInteractive()->revealInFileBrowser(path.toQString());
+
+    if (!ret) {
+        LOGE() << "Could not open folder: " << path.toQString();
+    }
+}
+
+std::vector<ViewMode> ExportProjectScenario::viewModes(const notation::INotationPtrList& notations) const
+{
+    std::vector<ViewMode> modes;
+    for (const INotationPtr& notation : notations) {
+        modes.push_back(notation->painting()->viewMode());
+    }
+
+    return modes;
+}
+
+void ExportProjectScenario::setViewModes(const notation::INotationPtrList& notations,
+                                         const std::vector<notation::ViewMode>& viewModes) const
+{
+    IF_ASSERT_FAILED(notations.size() == viewModes.size()) {
+        return;
+    }
+
+    for (size_t i = 0; i < notations.size(); ++i) {
+        notations[i]->painting()->setViewMode(viewModes[i]);
+    }
+}
+
+void ExportProjectScenario::setViewModes(const notation::INotationPtrList& notations, ViewMode viewMode) const
+{
+    std::vector<notation::ViewMode> modes(notations.size(), viewMode);
+    setViewModes(notations, modes);
+}

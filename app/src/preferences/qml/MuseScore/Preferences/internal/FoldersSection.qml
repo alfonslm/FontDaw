@@ -1,0 +1,143 @@
+/*
+ * SPDX-License-Identifier: GPL-3.0-only
+ * MuseScore-Studio-CLA-applies
+ *
+ * MuseScore Studio
+ * Music Composition & Notation
+ *
+ * Copyright (C) 2021 MuseScore Limited and others
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License version 3 as
+ * published by the Free Software Foundation.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+import QtQuick
+import QtQuick.Layouts
+
+import Muse.Ui
+import Muse.UiComponents
+
+BaseSection {
+    id: root
+
+    title: qsTrc("preferences", "Folders")
+
+    navigation.direction: NavigationPanel.Both
+
+    property alias model: view.model
+
+    StyledListView {
+        id: view
+
+        width: parent.width
+        height: contentHeight
+
+        spacing: 4
+        interactive: false
+
+        delegate: RowLayout {
+            width: ListView.view.width
+            height: 30
+
+            spacing: root.columnSpacing
+
+            StyledTextLabel {
+                id: titleLabel
+                Layout.preferredWidth: root.columnWidth
+                text: model.title
+                horizontalAlignment: Text.AlignLeft
+            }
+
+            FilePicker {
+                Layout.fillWidth: true
+
+                pickerType: model.isMultiDirectories ? FilePicker.PickerType.MultipleDirectories : FilePicker.PickerType.Directory
+                dialogTitle: qsTrc("preferences", "Choose %1 folder").arg(model.title)
+                dir: model.dir
+
+                path: model.path
+
+                navigation: root.navigation
+                navigationRowOrderStart: model.index
+                pathFieldTitle: titleLabel.text
+
+                onPathEdited: function(newPath) {
+                    model.path = newPath
+                }
+            }
+        }
+    }
+
+    RowLayout {
+        width: parent.width
+        height: 30
+
+        spacing: root.columnSpacing
+
+        StyledTextLabel {
+            Layout.preferredWidth: root.columnWidth
+            text: qsTrc("preferences", "Keyswitch Maps")
+            horizontalAlignment: Text.AlignLeft
+        }
+
+        FlatButton {
+            Layout.alignment: Qt.AlignVCenter
+            text: qsTrc("preferences", "Open Folder")
+
+            navigation.name: "openKeyswitchMapsFolderButton"
+            navigation.panel: root.navigation
+            navigation.row: view.count + 1
+
+            onClicked: {
+                Qt.callLater(root.model.openKeyswitchMapsFolder)
+            }
+        }
+
+        FlatButton {
+            Layout.alignment: Qt.AlignVCenter
+            text: qsTrc("preferences", "Export Default Map")
+
+            navigation.name: "exportDefaultKeyswitchMapButton"
+            navigation.panel: root.navigation
+            navigation.row: view.count + 2
+
+            onClicked: {
+                exportStatusLabel.text = root.model.exportDefaultKeyswitchMap()
+                                         ? qsTrc("preferences", "Exported")
+                                         : qsTrc("preferences", "Already exists")
+            }
+        }
+
+        StyledTextLabel {
+            id: exportStatusLabel
+            Layout.alignment: Qt.AlignVCenter
+        }
+    }
+
+    RowLayout {
+        visible: root.model.vstEnabled
+        width: parent.width
+
+        Item { Layout.fillWidth: true }
+
+        FlatButton {
+            text: qsTrc("preferences", "Rescan VST3 plugins")
+
+            navigation.name: "rescanVstPluginsButton"
+            navigation.panel: root.navigation
+            navigation.row: view.count + 3
+
+            onClicked: {
+                Qt.callLater(root.model.rescanVstPlugins)
+            }
+        }
+    }
+}

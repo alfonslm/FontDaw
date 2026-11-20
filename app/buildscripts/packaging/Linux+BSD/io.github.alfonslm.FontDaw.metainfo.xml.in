@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Copyright 2018-2025 MuseScore Limited and others -->
+<!-- FontDaw: text is provisional (FD-044). -->
+<component type="desktop-application">
+    <!--
+        Please write XML tags in the order they are specified in
+        https://www.freedesktop.org/software/appstream/docs/chap-Metadata.html#spec-component-filespec
+
+        After editing, run either of these commands to check for errors in this file:
+            $  appstreamcli validate [filename]
+            $  appstream-util validate [filename]
+    -->
+    <id>io.github.alfonslm.FontDaw@MUSE_APP_INSTALL_SUFFIX@</id>
+    <metadata_license>CC0-1.0</metadata_license><!-- License of this file -->
+    <project_license>GPL-3.0-only</project_license>
+    <name>FontDaw</name>
+    <summary>Notation-first digital audio workstation</summary>
+    <description>
+        <p>FontDaw is a notation-first digital audio workstation based on MuseScore Studio. The score stays central, with audio tracks added around it.</p>
+        <p>FontDaw is free software, published under the GNU General Public License version 3.</p>
+    </description>
+    <!-- <categories> in .desktop file -->
+    <!-- <keywords> in .desktop file -->
+    <url type="homepage">https://github.com/alfonslm/FontDaw</url>
+    <launchable type="desktop-id">io.github.alfonslm.FontDaw@MUSE_APP_INSTALL_SUFFIX@.desktop</launchable>
+    <provides>
+        <!-- <mediatype> in .desktop file as MimeType -->
+        <binary>fontdaw@MUSE_APP_INSTALL_SUFFIX@</binary>
+        <id>io.github.alfonslm.FontDaw@MUSE_APP_INSTALL_SUFFIX@.desktop</id>
+    </provides>
+    <!-- <releases> moved to bottom of this file to keep it out the way -->
+    <supports>
+        <control>pointing</control>
+        <control>keyboard</control>
+        <control>console</control>
+        <control>touch</control>
+        <internet>offline-only</internet>
+    </supports>
+    <developer id="io.github.alfonslm">
+        <name>FontDaw contributors</name>
+    </developer>
+    <translation type="qt">fontdaw@MUSE_APP_INSTALL_SUFFIX@-@MUSE_APP_VERSION_MAJ_MIN@/locale/instruments</translation>
+    <translation type="qt">fontdaw@MUSE_APP_INSTALL_SUFFIX@-@MUSE_APP_VERSION_MAJ_MIN@/locale/musescore</translation>
+    <translation type="qt">fontdaw@MUSE_APP_INSTALL_SUFFIX@-@MUSE_APP_VERSION_MAJ_MIN@/locale/qt</translation>
+    <translation type="qt">fontdaw@MUSE_APP_INSTALL_SUFFIX@-@MUSE_APP_VERSION_MAJ_MIN@/locale/qtbase</translation>
+    <content_rating type="oars-1.1" />
+    <!-- GNOME extensions -->
+    <kudos>
+        <kudo>HiDpiIcon</kudo>
+        <kudo>HighContrast</kudo>
+        <kudo>ModernToolkit</kudo>
+    </kudos>
+    <!-- Only <releases> below this point please! -->
+    <!-- Nothing below <releases> please. -->
+</component>

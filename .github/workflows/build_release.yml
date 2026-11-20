@@ -1,0 +1,480 @@
+# Builds FontDaw from the source in app/ for macOS (Apple silicon), Linux (x86_64 AppImage) and
+# Windows (x64), smoke-tests each build, and publishes the ones that pass as a GitHub pre-release.
+# Based on the build_macos_arm64, build_linux and build_windows workflows of the FontDaw source and
+# its buildscripts/, with these differences:
+# - build mode "testing", as MuseScore builds betas and release candidates: no "Development" in
+#   the name, no developer tools or Diagnostics menu (Help keeps its Diagnostics submenu, as in
+#   MuseScore's releases), and the normal FontDaw settings folder; the macOS app is "FontDaw.app";
+# - the version label (for example "Public RC1") is set from the workflow input or the tag;
+# - no code signing (macOS is signed ad hoc), no notarisation, no crash reporter, no translation
+#   download, no Muse Group services;
+# - GitHub-hosted runners (free for public repositories).
+#
+# Start it by pushing a tag such as v0.1.1-public-rc1, or by hand: Actions -> this workflow ->
+# Run workflow. The release notes come from .github/release-notes/<tag>.md.
+# The release is published when the macOS build passed its smoke test. Linux and Windows are
+# attached when theirs passed; a failed Linux or Windows build does not block the release, and the
+# release job's summary lists what is missing.
+name: 'Release: FontDaw (macOS, Linux, Windows)'
+
+on:
+  push:
+    tags:
+      - 'v*-public-rc*'
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Release tag to create or update, for example v0.1.1-public-rc1'
+        default: 'v0.1.1-public-rc1'
+        required: true
+      label:
+        description: 'Version label shown in About, for example "Public RC1"'
+        default: 'Public RC1'
+        required: true
+      title:
+        description: 'Release title'
+        default: 'FontDaw 0.1.1 Public RC1'
+        required: true
+
+permissions:
+  contents: read
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  prepare:
+    runs-on: ubuntu-24.04
+    outputs:
+      tag: ${{ steps.cfg.outputs.tag }}
+      label: ${{ steps.cfg.outputs.label }}
+      title: ${{ steps.cfg.outputs.title }}
+      version: ${{ steps.cfg.outputs.version }}
+      asset_base: ${{ steps.cfg.outputs.asset_base }}
+      build_number: ${{ steps.cfg.outputs.build_number }}
+    steps:
+    - name: Clone repository
+      uses: actions/checkout@v4
+      with:
+        persist-credentials: false
+
+    - name: Check tag, label, title and version
+      id: cfg
+      env:
+        GH_TOKEN: ${{ github.token }}
+        EVENT_NAME: ${{ github.event_name }}
+        REF_NAME: ${{ github.ref_name }}
+        IN_TAG: ${{ inputs.tag }}
+        IN_LABEL: ${{ inputs.label }}
+        IN_TITLE: ${{ inputs.title }}
+      run: |
+        set -euo pipefail
+        if [ "$EVENT_NAME" == "push" ]; then
+          TAG="$REF_NAME"
+          # v0.1.1-public-rc1 -> "Public RC1", "FontDaw 0.1.1 Public RC1"
+          if ! [[ "$TAG" =~ ^v([0-9]+\.[0-9]+\.[0-9]+)-public-rc([0-9]+)$ ]]; then echo "::error::bad tag: $TAG"; exit 1; fi
+          LABEL="Public RC${BASH_REMATCH[2]}"
+          TITLE="FontDaw ${BASH_REMATCH[1]} ${LABEL}"
+        else
+          TAG="$IN_TAG"; LABEL="$IN_LABEL"; TITLE="$IN_TITLE"
+        fi
+        if ! [[ "$TAG" =~ ^v([0-9]+\.[0-9]+\.[0-9]+)-[A-Za-z0-9.-]+$ ]]; then echo "::error::bad tag: $TAG"; exit 1; fi
+        TAG_VERSION="${BASH_REMATCH[1]}"
+        if ! [[ "$LABEL" =~ ^[A-Za-z0-9\ ]+$ ]]; then echo "::error::bad label: $LABEL"; exit 1; fi
+        if ! [[ "$TITLE" =~ ^FontDaw\ [0-9]+\.[0-9]+\.[0-9]+\ [A-Za-z0-9\ ]+$ ]]; then echo "::error::bad title: $TITLE"; exit 1; fi
+
+        # The tag's version must be the version the source builds.
+        SRC_VERSION="$(cmake -P app/version.cmake | sed -n -e 's/^.*MUSE_APP_VERSION  *//p')"
+        if [ "$SRC_VERSION" != "$TAG_VERSION" ]; then
+          echo "::error::tag $TAG is version $TAG_VERSION, but app/version.cmake builds $SRC_VERSION"; exit 1
+        fi
+        if [[ "$TITLE" != "FontDaw ${SRC_VERSION} "* ]]; then echo "::error::title does not name version $SRC_VERSION"; exit 1; fi
+        grep -qx 'set(MUSE_APP_VERSION_LABEL "")' app/version.cmake || { echo "::error::app/version.cmake has no empty label line to set"; exit 1; }
+
+        if [ ! -f ".github/release-notes/${TAG}.md" ]; then echo "::error::no release notes at .github/release-notes/${TAG}.md"; exit 1; fi
+
+        # A manual run may only build the commit the tag already names (or a tag that does not exist yet).
+        if [ "$EVENT_NAME" != "push" ]; then
+          TAG_SHA="$(gh api "repos/${GITHUB_REPOSITORY}/commits/${TAG}" --jq .sha 2>/dev/null || true)"
+          if [ -n "$TAG_SHA" ] && [ "$TAG_SHA" != "$GITHUB_SHA" ]; then
+            echo "::error::tag $TAG names $TAG_SHA, but this run builds $GITHUB_SHA; run it on the tag"
+            exit 1
+          fi
+        fi
+
+        BUILD_NUMBER="$(date -u +%y%m%d%H%M)"; BUILD_NUMBER="${BUILD_NUMBER:0:9}"
+        {
+          echo "tag=$TAG"
+          echo "label=$LABEL"
+          echo "title=$TITLE"
+          echo "version=$SRC_VERSION"
+          echo "asset_base=FontDaw-${SRC_VERSION}-$(tr ' ' '-' <<<"$LABEL")"
+          echo "build_number=$BUILD_NUMBER"
+        } | tee -a "$GITHUB_OUTPUT"
+
+  macos:
+    needs: prepare
+    runs-on: macos-26
+    env:
+      RELEASE_LABEL: ${{ needs.prepare.outputs.label }}
+      RELEASE_VERSION: ${{ needs.prepare.outputs.version }}
+      ASSET_BASE: ${{ needs.prepare.outputs.asset_base }}
+      BUILD_NUMBER: ${{ needs.prepare.outputs.build_number }}
+    defaults:
+      run:
+        working-directory: app
+    steps:
+    - name: Clone repository
+      uses: actions/checkout@v4
+      with:
+        persist-credentials: false
+
+    - name: Configure build
+      run: |
+        set -euo pipefail
+        bash ./buildscripts/ci/tools/make_build_mode_env.sh -m testing
+        bash ./buildscripts/ci/tools/make_build_number.sh "$BUILD_NUMBER"
+        # version.cmake carries an empty label in the source; a release candidate sets it here,
+        # as MuseScore sets it for its betas and release candidates.
+        sed -i '' -E "s/^set\(MUSE_APP_VERSION_LABEL \"\"\)$/set(MUSE_APP_VERSION_LABEL \"${RELEASE_LABEL}\")/" version.cmake
+        grep -qx "set(MUSE_APP_VERSION_LABEL \"${RELEASE_LABEL}\")" version.cmake || { echo "::error::version label not set"; exit 1; }
+
+    - name: Restore ccache files
+      id: restore-ccache
+      uses: actions/cache/restore@v4
+      with:
+        path: ${{ github.workspace }}/.ccache
+        key: ${{ runner.os }}-${{ runner.arch }}-release-ccache-
+        restore-keys: ${{ runner.os }}-${{ runner.arch }}-release-ccache-
+
+    - name: Setup ccache
+      run: |
+        brew install ccache
+        bash ./muse/buildscripts/ci/tools/setup_ccache_config.sh
+
+    - name: Install Qt
+      uses: jurplel/install-qt-action@b344308e4483fc892e0d27b3cd1b173ebdd95f06 # v4.5.0
+      with:
+        version: 6.11.2
+        host: 'mac'
+        target: 'desktop'
+        arch: 'clang_64'
+        modules: 'qt5compat qtnetworkauth qtshadertools qtwebsockets'
+        cache: true
+
+    - name: Generate _en.ts files
+      env:
+        LUPDATE_ARGS: ""
+        POSTPROCESS_ARGS: "--warn-only"
+      run: bash ./tools/translations/run_lupdate.sh
+
+    - name: Build
+      run: bash ./buildscripts/ci/macos/build.sh -n "${BUILD_NUMBER}" --dockwidgets_v2 ON --archs "arm64"
+
+    - name: Show ccache stats
+      run: ccache -sv
+
+    # The inner packaging script is called directly, so the app is "FontDaw.app" (the CI wrapper
+    # buildscripts/ci/macos/package.sh would name a testing build "FontDaw Testing.app").
+    # No --sign: the script re-signs the app ad hoc.
+    - name: Package (ad-hoc signed)
+      run: |
+        set -euo pipefail
+        bash ./buildscripts/packaging/macOS/package.sh --app-name "FontDaw" --vol-name "$ASSET_BASE"
+        mkdir -p ../release
+        mv "applebuild/${ASSET_BASE}.dmg" "../release/${ASSET_BASE}-macOS-arm64.dmg"
+
+    - name: Smoke test
+      run: |
+        set -euo pipefail
+        DMG="../release/${ASSET_BASE}-macOS-arm64.dmg"
+        MNT="$(mktemp -d)"
+        hdiutil attach -nobrowse -readonly -mountpoint "$MNT" "$DMG"
+        trap 'hdiutil detach "$MNT" || true' EXIT
+        APP="$MNT/FontDaw.app"
+        test -d "$APP" || { echo "::error::FontDaw.app is not in the disk image"; exit 1; }
+        codesign --verify --deep --strict --verbose=2 "$APP"
+        # --long-version is answered before any window or platform plugin starts, so it needs no
+        # display. macOS has no timeout(1); perl's alarm stops a hang after 60 s.
+        OUT="$(perl -e 'alarm 60; exec @ARGV' "$APP/Contents/MacOS/fontdaw" --long-version 2>/dev/null)"
+        echo "$OUT"
+        grep -q "^FontDaw; Version ${RELEASE_VERSION}:${BUILD_NUMBER};" <<<"$OUT" || { echo "::error::unexpected version output"; exit 1; }
+        # The label is not printed on the command line (it shows in About); check it is built in.
+        grep -aq "${RELEASE_LABEL}" "$APP/Contents/MacOS/fontdaw" || { echo "::error::label ${RELEASE_LABEL} is not in the binary"; exit 1; }
+        if grep -aq "Unstable Prerelease" <<<"$OUT"; then echo "::error::this is a development build"; exit 1; fi
+
+    - name: Checksum
+      working-directory: release
+      run: |
+        set -euo pipefail
+        # "<hash>  <file name>", so that users can check it with shasum -c / sha256sum -c
+        shasum -a 256 "${ASSET_BASE}-macOS-arm64.dmg" > "${ASSET_BASE}-macOS-arm64.dmg.sha256"
+        shasum -a 256 -c "${ASSET_BASE}-macOS-arm64.dmg.sha256"
+
+    - name: Upload
+      uses: actions/upload-artifact@v4
+      with:
+        name: release-macos
+        path: release/
+        if-no-files-found: error
+
+    - name: Prepare ccache files for saving
+      id: prepare-save-ccache
+      if: always()
+      run: |
+        ccache --recompress 10 || true
+        echo "CCACHE_TIMESTAMP=$(date -u +"%F-%T")" | tee -a $GITHUB_OUTPUT
+
+    - name: Save ccache files
+      if: always()
+      uses: actions/cache/save@v4
+      with:
+        key: ${{ steps.restore-ccache.outputs.cache-primary-key }}${{ steps.prepare-save-ccache.outputs.CCACHE_TIMESTAMP }}
+        path: ${{ github.workspace }}/.ccache
+
+  linux:
+    needs: prepare
+    runs-on: ubuntu-24.04
+    env:
+      RELEASE_LABEL: ${{ needs.prepare.outputs.label }}
+      RELEASE_VERSION: ${{ needs.prepare.outputs.version }}
+      ASSET_BASE: ${{ needs.prepare.outputs.asset_base }}
+      BUILD_NUMBER: ${{ needs.prepare.outputs.build_number }}
+    defaults:
+      run:
+        working-directory: app
+    steps:
+    - name: Clone repository
+      uses: actions/checkout@v4
+      with:
+        persist-credentials: false
+
+    - name: Configure build
+      run: |
+        set -euo pipefail
+        bash ./buildscripts/ci/tools/make_build_mode_env.sh -m testing
+        bash ./buildscripts/ci/tools/make_build_number.sh "$BUILD_NUMBER"
+        sed -i -E "s/^set\(MUSE_APP_VERSION_LABEL \"\"\)$/set(MUSE_APP_VERSION_LABEL \"${RELEASE_LABEL}\")/" version.cmake
+        grep -qx "set(MUSE_APP_VERSION_LABEL \"${RELEASE_LABEL}\")" version.cmake || { echo "::error::version label not set"; exit 1; }
+
+    - name: Install Qt
+      uses: jurplel/install-qt-action@b344308e4483fc892e0d27b3cd1b173ebdd95f06 # v4.5.0
+      with:
+        version: 6.11.2
+        host: 'linux'
+        target: 'desktop'
+        arch: 'linux_gcc_64'
+        modules: 'qt5compat qtnetworkauth qtshadertools qtwebsockets'
+        cache: true
+
+    - name: Setup environment
+      run: bash ./buildscripts/ci/linux/setup.sh --arch x86_64 --build-pipewire
+
+    - name: Generate _en.ts files
+      env:
+        LUPDATE_ARGS: ""
+        POSTPROCESS_ARGS: "--warn-only"
+      run: bash ./tools/translations/run_lupdate.sh
+
+    - name: Build
+      run: bash ./buildscripts/ci/linux/build.sh -n "${BUILD_NUMBER}" --arch x86_64 --build-pipewire --dockwidgets_v2 ON
+
+    - name: Package
+      run: |
+        set -euo pipefail
+        bash ./buildscripts/ci/linux/package.sh --arch x86_64 --build-pipewire
+        mkdir -p ../release
+        mv "build.artifacts/$(cat build.artifacts/env/artifact_name.env)" "../release/${ASSET_BASE}-linux-x86_64.AppImage"
+        chmod +x "../release/${ASSET_BASE}-linux-x86_64.AppImage"
+
+    - name: Smoke test
+      run: |
+        set -euo pipefail
+        WORK="$(mktemp -d)"
+        cp "../release/${ASSET_BASE}-linux-x86_64.AppImage" "$WORK/app.AppImage"
+        (cd "$WORK" && ./app.AppImage --appimage-extract >/dev/null)
+        BIN="$(find "$WORK/squashfs-root" -path '*/bin/fontdaw*' -type f -perm -u+x | head -1)"
+        test -n "$BIN" || { echo "::error::no fontdaw binary in the AppImage"; exit 1; }
+        OUT="$(QT_QPA_PLATFORM=offscreen timeout 60 "$WORK/squashfs-root/AppRun" --long-version 2>/dev/null)"
+        echo "$OUT"
+        grep -q "^FontDaw; Version ${RELEASE_VERSION}:${BUILD_NUMBER};" <<<"$OUT" || { echo "::error::unexpected version output"; exit 1; }
+        grep -aq "${RELEASE_LABEL}" "$BIN" || { echo "::error::label ${RELEASE_LABEL} is not in the binary"; exit 1; }
+
+    - name: Checksum
+      working-directory: release
+      run: |
+        set -euo pipefail
+        sha256sum "${ASSET_BASE}-linux-x86_64.AppImage" > "${ASSET_BASE}-linux-x86_64.AppImage.sha256"
+        sha256sum -c "${ASSET_BASE}-linux-x86_64.AppImage.sha256"
+
+    - name: Upload
+      uses: actions/upload-artifact@v4
+      with:
+        name: release-linux
+        path: release/
+        if-no-files-found: error
+
+  windows:
+    needs: prepare
+    runs-on: windows-2025
+    env:
+      RELEASE_LABEL: ${{ needs.prepare.outputs.label }}
+      RELEASE_VERSION: ${{ needs.prepare.outputs.version }}
+      ASSET_BASE: ${{ needs.prepare.outputs.asset_base }}
+      BUILD_NUMBER: ${{ needs.prepare.outputs.build_number }}
+    defaults:
+      run:
+        working-directory: app
+        shell: bash
+    steps:
+    - name: Clone repository
+      uses: actions/checkout@v4
+      with:
+        persist-credentials: false
+
+    - name: Configure build
+      run: |
+        set -euo pipefail
+        bash ./buildscripts/ci/tools/make_build_mode_env.sh -m testing
+        bash ./buildscripts/ci/tools/make_build_number.sh "$BUILD_NUMBER"
+        sed -i -E "s/^set\(MUSE_APP_VERSION_LABEL \"\"\)$/set(MUSE_APP_VERSION_LABEL \"${RELEASE_LABEL}\")/" version.cmake
+        grep -qx "set(MUSE_APP_VERSION_LABEL \"${RELEASE_LABEL}\")" version.cmake || { echo "::error::version label not set"; exit 1; }
+
+    - name: Install Qt
+      uses: jurplel/install-qt-action@b344308e4483fc892e0d27b3cd1b173ebdd95f06 # v4.5.0
+      with:
+        version: 6.11.2
+        host: 'windows'
+        target: 'desktop'
+        arch: 'win64_msvc2022_64'
+        modules: 'qt5compat qtnetworkauth qtshadertools qtwebsockets'
+        cache: true
+
+    # Without --portable: the PortableApps.com tools are downloaded from a Muse Group server.
+    - name: Setup environment
+      shell: cmd
+      run: buildscripts\ci\windows\setup.bat
+
+    - name: Generate _en.ts files
+      env:
+        LUPDATE_ARGS: ""
+        POSTPROCESS_ARGS: "--warn-only"
+        POSTPROCESS_LAUNCHER: "python3 -X utf8"
+      run: bash ./tools/translations/run_lupdate.sh
+
+    - name: Build
+      shell: cmd
+      run: buildscripts\ci\windows\build.bat -n %BUILD_NUMBER% --dockwidgets_v2 ON
+
+    - name: Package as .zip
+      run: |
+        set -euo pipefail
+        mkdir -p ../release
+        NAME="${ASSET_BASE}-windows-x64"
+        cp -r build.install "$NAME"
+        7z a -tzip "../release/${NAME}.zip" "$NAME" > /dev/null
+
+    - name: Smoke test
+      run: |
+        set -euo pipefail
+        # cygpath -m: a C:/... path that both bash and 7-Zip understand
+        WORK="$(cygpath -m "$(mktemp -d)")"
+        7z x -y -o"$WORK" "../release/${ASSET_BASE}-windows-x64.zip" > /dev/null
+        EXE="$(find "$WORK/${ASSET_BASE}-windows-x64" -name FontDaw.exe -type f | head -1)"
+        test -n "$EXE" || { echo "::error::FontDaw.exe is not in the zip"; exit 1; }
+        timeout 60 "$EXE" --long-version > "$WORK/out.txt" 2>/dev/null
+        OUT="$(tr -d '\r' < "$WORK/out.txt")"
+        echo "$OUT"
+        grep -q "^FontDaw; Version ${RELEASE_VERSION}:${BUILD_NUMBER};" <<<"$OUT" || { echo "::error::unexpected version output"; exit 1; }
+        grep -aq "${RELEASE_LABEL}" "$EXE" || { echo "::error::label ${RELEASE_LABEL} is not in the binary"; exit 1; }
+
+    # The installer (WiX, as in the source's own Windows build) is optional: if it fails, the
+    # release has the .zip only. It is built from the same binaries the smoke test ran, unsigned.
+    - name: Package installer (.msi, unsigned)
+      id: msi
+      continue-on-error: true
+      shell: cmd
+      run: |
+        IF "%WIX%" == "" (
+          choco install -y wixtoolset
+          SET "WIX=C:\Program Files (x86)\WiX Toolset v3.14\"
+        )
+        CALL buildscripts\ci\windows\package.bat
+        IF ERRORLEVEL 1 EXIT /b 1
+        FOR /F "usebackq delims=" %%i IN ("build.artifacts\env\artifact_name.env") DO SET "MSI=%%i"
+        MOVE /Y "build.artifacts\%MSI%" "..\release\%ASSET_BASE%-windows-x64.msi" || EXIT /b 1
+
+    - name: Checksums
+      working-directory: release
+      run: |
+        set -euo pipefail
+        for f in *.zip *.msi; do
+          [ -f "$f" ] || continue
+          sha256sum "$f" | sed 's/ \*/  /' > "$f.sha256"
+          sha256sum -c "$f.sha256"
+        done
+        ls -l
+
+    - name: Upload
+      uses: actions/upload-artifact@v4
+      with:
+        name: release-windows
+        path: release/
+        if-no-files-found: error
+
+  release:
+    needs: [prepare, macos, linux, windows]
+    # Published when macOS passed; Linux and Windows are attached when they passed.
+    if: always() && needs.prepare.result == 'success' && needs.macos.result == 'success'
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: write
+    env:
+      RELEASE_TAG: ${{ needs.prepare.outputs.tag }}
+      RELEASE_TITLE: ${{ needs.prepare.outputs.title }}
+    steps:
+    - name: Clone repository
+      uses: actions/checkout@v4
+      with:
+        persist-credentials: false
+
+    - name: Download builds
+      uses: actions/download-artifact@v4
+      with:
+        pattern: release-*
+        path: release
+        merge-multiple: true
+
+    - name: Summary
+      env:
+        LINUX: ${{ needs.linux.result }}
+        WINDOWS: ${{ needs.windows.result }}
+      run: |
+        set -euo pipefail
+        {
+          echo "## ${RELEASE_TITLE}"
+          echo
+          echo "| File | Size |"
+          echo "|---|---|"
+          for f in release/*; do echo "| $(basename "$f") | $(stat -c %s "$f") |"; done
+          echo
+          [ "$LINUX" == "success" ] || echo "- **Missing: Linux** (job result: $LINUX)"
+          [ "$WINDOWS" == "success" ] || echo "- **Missing: Windows** (job result: $WINDOWS)"
+          ls release/*.msi >/dev/null 2>&1 || echo "- No Windows installer (.msi); the .zip is attached if Windows passed"
+        } >> "$GITHUB_STEP_SUMMARY"
+        cat "$GITHUB_STEP_SUMMARY"
+
+    - name: Publish the pre-release
+      env:
+        GH_TOKEN: ${{ github.token }}
+      run: |
+        set -euo pipefail
+        NOTES=".github/release-notes/${RELEASE_TAG}.md"
+        if gh release view "$RELEASE_TAG" >/dev/null 2>&1; then
+          gh release upload "$RELEASE_TAG" release/* --clobber
+          gh release edit "$RELEASE_TAG" --title "$RELEASE_TITLE" --notes-file "$NOTES" --prerelease
+        else
+          gh release create "$RELEASE_TAG" release/* \
+            --target "$GITHUB_SHA" --title "$RELEASE_TITLE" --notes-file "$NOTES" --prerelease
+        fi
