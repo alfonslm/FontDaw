@@ -35,6 +35,13 @@ on:
         description: 'Release title'
         default: 'FontDaw 0.1.1 Public RC1'
         required: true
+      macos_runner:
+        description: 'macOS runner image (macos-15 if macos-26 gets no runner; the icon needs Xcode 26 or later)'
+        type: choice
+        options:
+          - macos-26
+          - macos-15
+        default: 'macos-26'
 
 permissions:
   contents: read
@@ -129,7 +136,7 @@ jobs:
 
   macos:
     needs: prepare
-    runs-on: macos-26
+    runs-on: ${{ inputs.macos_runner || 'macos-26' }}
     env:
       RELEASE_LABEL: ${{ needs.prepare.outputs.label }}
       RELEASE_VERSION: ${{ needs.prepare.outputs.version }}
@@ -153,6 +160,11 @@ jobs:
         # as MuseScore sets it for its betas and release candidates.
         sed -i '' -E "s/^set\(MUSE_APP_VERSION_LABEL \"\"\)$/set(MUSE_APP_VERSION_LABEL \"${RELEASE_LABEL}\")/" version.cmake
         grep -qx "set(MUSE_APP_VERSION_LABEL \"${RELEASE_LABEL}\")" version.cmake || { echo "::error::version label not set"; exit 1; }
+
+    - name: Show Xcode
+      run: |
+        xcodebuild -version
+        xcrun actool --version | grep -A1 short-bundle-version || true
 
     - name: Restore ccache files
       id: restore-ccache

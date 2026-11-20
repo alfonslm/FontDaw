@@ -38,3 +38,7 @@ qt_add_qml_module(pointertools_qml
         internal/PointerMenuPopup.qml
         internal/RingMenu.qml
 )
+
+# QQuickItem and friends: Qt Quick is linked explicitly, as upstream QML modules do, because
+# without precompiled headers (the Windows build) it does not come in through another target.
+target_link_libraries(pointertools_qml PRIVATE Qt::Quick)
