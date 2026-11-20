@@ -62,7 +62,6 @@ jobs:
     - name: Check tag, label, title and version
       id: cfg
       env:
-        GH_TOKEN: ${{ github.token }}
         EVENT_NAME: ${{ github.event_name }}
         REF_NAME: ${{ github.ref_name }}
         IN_TAG: ${{ inputs.tag }}
@@ -94,12 +93,27 @@ jobs:
 
         if [ ! -f ".github/release-notes/${TAG}.md" ]; then echo "::error::no release notes at .github/release-notes/${TAG}.md"; exit 1; fi
 
-        # A manual run may only build the commit the tag already names (or a tag that does not exist yet).
+        # A manual run may only build the commit the tag already names, or a tag that does not exist
+        # yet (the release job then creates it at GITHUB_SHA). git ls-remote --exit-code returns 2
+        # when no such tag exists; any other non-zero status is an error, never compared as a SHA.
         if [ "$EVENT_NAME" != "push" ]; then
-          TAG_SHA="$(gh api "repos/${GITHUB_REPOSITORY}/commits/${TAG}" --jq .sha 2>/dev/null || true)"
-          if [ -n "$TAG_SHA" ] && [ "$TAG_SHA" != "$GITHUB_SHA" ]; then
-            echo "::error::tag $TAG names $TAG_SHA, but this run builds $GITHUB_SHA; run it on the tag"
-            exit 1
+          set +e
+          REFS="$(git ls-remote --exit-code --tags "https://github.com/${GITHUB_REPOSITORY}" "refs/tags/${TAG}" "refs/tags/${TAG}^{}")"
+          RC=$?
+          set -e
+          if [ "$RC" -eq 2 ]; then
+            echo "tag $TAG does not exist yet; the release job creates it at $GITHUB_SHA"
+          elif [ "$RC" -ne 0 ]; then
+            echo "::error::could not look up tag $TAG (git ls-remote exit $RC)"; exit 1
+          else
+            # An annotated tag lists its commit as refs/tags/<tag>^{}; a lightweight tag only as refs/tags/<tag>.
+            TAG_SHA="$(awk -v r="refs/tags/${TAG}^{}" '$2==r {print $1}' <<<"$REFS")"
+            [ -n "$TAG_SHA" ] || TAG_SHA="$(awk -v r="refs/tags/${TAG}" '$2==r {print $1}' <<<"$REFS")"
+            if ! [[ "$TAG_SHA" =~ ^[0-9a-f]{40}$ ]]; then echo "::error::could not resolve tag $TAG"; exit 1; fi
+            if [ "$TAG_SHA" != "$GITHUB_SHA" ]; then
+              echo "::error::tag $TAG names $TAG_SHA, but this run builds $GITHUB_SHA; run it on the tag"; exit 1
+            fi
+            echo "tag $TAG names $GITHUB_SHA"
           fi
         fi
 
