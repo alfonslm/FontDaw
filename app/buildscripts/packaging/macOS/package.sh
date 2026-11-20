@@ -228,11 +228,18 @@ rm -f "applebuild/${COMPRESSED_DMG_NAME}"
 # Tip: increase the size if error on copy
 diskutil image create blank --size 800m --fs APFS --volumeName "${VOL_NAME}" "applebuild/${DMG_NAME}"
 
-# Mount the disk image
-VOLUME="/Volumes/${VOL_NAME}"
-ATTACH_OUTPUT=$(diskutil image attach "applebuild/${DMG_NAME}" --mountPoint "${VOLUME}")
+# Mount the disk image. hdiutil picks the mount point itself (normally /Volumes/<volume name>,
+# with a number added if that is taken) and prints it; diskutil's --mountPoint needs an existing
+# folder, and /Volumes belongs to root.
+ATTACH_OUTPUT=$(hdiutil attach -readwrite -noverify -noautoopen "applebuild/${DMG_NAME}")
 echo "${ATTACH_OUTPUT}"
 DEV=$(echo "${ATTACH_OUTPUT}" | head -n1 | awk '{print $1}')
+VOLUME=$(echo "${ATTACH_OUTPUT}" | grep -o '/Volumes/.*$' | tail -n1)
+if [ -z "${DEV}" ] || [ -z "${VOLUME}" ] || [ ! -d "${VOLUME}" ]; then
+    echo "error: could not find where the disk image was mounted"
+    exit 1
+fi
+echo "Mounted ${DEV} at ${VOLUME}"
 
 # copy in the application bundle
 cp -Rp ${APP_PATH} "${VOLUME}/${APP_NAME}.app"

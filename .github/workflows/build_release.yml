@@ -364,6 +364,10 @@ jobs:
         arch: 'win64_msvc2022_64'
         modules: 'qt5compat qtnetworkauth qtshadertools qtwebsockets'
         cache: true
+        # Qt 6.11 for Windows is published in one repository folder per compiler; aqtinstall 3.3.0
+        # (the newest release) does not know that layout yet. Its main branch does ("Support Qt
+        # 6.11+ for Windows x64"), pinned here to one commit.
+        aqtsource: 'git+https://github.com/miurahr/aqtinstall.git@5a49f2b391ae8ee1d3c0dd87f8b33c1d49a4deb7'
 
     # Without --portable: the PortableApps.com tools are downloaded from a Muse Group server.
     - name: Setup environment
