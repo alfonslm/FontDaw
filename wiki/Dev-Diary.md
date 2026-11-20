@@ -4,6 +4,25 @@ What we have done on FontDaw, newest first. One entry for a day with notable pro
 
 An entry about features that are only in development builds names the development build it describes. Once there are releases, entries name the release's version number instead.
 
+## 20 November 2026: a first version for real work
+
+*Release candidate 0.1.1 RC3 (261120110), 20 November 2026.*
+
+**A version to work in.** FontDaw now has a slow release branch next to the development one. Only tested changes go there, so a build from it can be used for real projects while new features are built elsewhere. Its first version, 0.1.1, is in testing and has been used for a full studio session.
+
+**Your MuseScore files stay safe.** FontDaw no longer saves over a score that was last saved by MuseScore, or by a newer FontDaw. MuseScore does not open a file once FontDaw has saved it, so FontDaw explains why and offers to save a copy next to it instead, and the original still opens in MuseScore. To take work from FontDaw back to MuseScore, export it as MusicXML.
+
+**Smaller things in 0.1.1.**
+
+- The Tab key opens the command menu in the score, but not while you type text such as lyrics.
+- The window always opens on the screen at a usable size. Quitting while in full screen could leave it invisible on the next start.
+- Full screen is in the View menu and the Dock icon's menu on macOS.
+- The mixer's level meters are drawn on the same scale as the faders, so 0 on a meter is level with 0 dB on its fader, and they turn yellow, orange and red by level.
+
+Still open: a large mix can still clip on its way out of the program. A clip light and floating-point output are planned for the next version.
+
+**What comes next.** A new file format for FontDaw's own projects, then finishing the features that are nearly done, such as exporting only a score's tempo map as a MIDI file to line up other programs with the score.
+
 ## 19 November 2026: audio in the score
 
 *Development build 0.1.0, 19 November 2026.*

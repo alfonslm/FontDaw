@@ -27,6 +27,19 @@
     <h1>Dev diary</h1>
     <p>What we have done on FontDaw, newest first. One entry for a day with notable progress. We write what changed for a user, and what did not work or is still open. Nothing here is a promise.</p>
     <p>An entry about features that are only in development builds names the development build it describes. Once there are releases, entries name the release's version number instead.</p>
+    <h2 id="20-november-2026-a-first-version-for-real-work">20 November 2026: a first version for real work</h2>
+    <p><em>Release candidate 0.1.1 RC3 (261120110), 20 November 2026.</em></p>
+    <p><strong>A version to work in.</strong> FontDaw now has a slow release branch next to the development one. Only tested changes go there, so a build from it can be used for real projects while new features are built elsewhere. Its first version, 0.1.1, is in testing and has been used for a full studio session.</p>
+    <p><strong>Your MuseScore files stay safe.</strong> FontDaw no longer saves over a score that was last saved by MuseScore, or by a newer FontDaw. MuseScore does not open a file once FontDaw has saved it, so FontDaw explains why and offers to save a copy next to it instead, and the original still opens in MuseScore. To take work from FontDaw back to MuseScore, export it as MusicXML.</p>
+    <p><strong>Smaller things in 0.1.1.</strong></p>
+    <ul>
+      <li>The Tab key opens the command menu in the score, but not while you type text such as lyrics.</li>
+      <li>The window always opens on the screen at a usable size. Quitting while in full screen could leave it invisible on the next start.</li>
+      <li>Full screen is in the View menu and the Dock icon's menu on macOS.</li>
+      <li>The mixer's level meters are drawn on the same scale as the faders, so 0 on a meter is level with 0 dB on its fader, and they turn yellow, orange and red by level.</li>
+    </ul>
+    <p>Still open: a large mix can still clip on its way out of the program. A clip light and floating-point output are planned for the next version.</p>
+    <p><strong>What comes next.</strong> A new file format for FontDaw's own projects, then finishing the features that are nearly done, such as exporting only a score's tempo map as a MIDI file to line up other programs with the score.</p>
     <h2 id="19-november-2026-audio-in-the-score">19 November 2026: audio in the score</h2>
     <p><em>Development build 0.1.0, 19 November 2026.</em></p>
     <p><strong>Audio is now part of the score.</strong> An audio track shows up in the score as an audio staff with its waveform, in every view and in print, and it plays in step with the notes. Insert or delete bars, and the audio moves with them. Besides WAV, you can now import FLAC, MP3, Ogg Vorbis and Opus files. Undo and redo cover audio edits too, in the same history as the score.</p>
