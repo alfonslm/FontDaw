@@ -1,9 +1,15 @@
 # Publishes the website in web/ to GitHub Pages.
-# Runs only when started by hand: Actions -> "Publish website" -> Run workflow.
+# Runs on every push to main that changes web/ (or this file), and can still be
+# started by hand: Actions -> "Publish website" -> Run workflow.
 name: Publish website
 
 on:
   workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'web/**'
+      - '.github/workflows/pages.yml'
 
 permissions:
   contents: read
