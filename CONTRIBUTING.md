@@ -20,3 +20,12 @@ By contributing you agree that your contribution is published under the same lic
 separate contributor licence agreement to sign.
 
 The source code is in the `app/` folder; building it works as for MuseScore Studio.
+
+## Automated review
+
+Maintainers may run an automated review by Claude, an AI model made by Anthropic, on a pull
+request, and may ask it about an issue by starting a comment with `@claude`. For this, the pull
+request's or issue's text, changes and comments are sent to Anthropic's API. Claude posts one
+comment, marked as generated. It cannot change your branch, run your code, approve or merge
+anything, and contributors cannot start it. Its review can be wrong: it is advice, and the
+decision to merge stays with the maintainer.
